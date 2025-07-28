@@ -86,3 +86,11 @@ if JQHubSettings.GunMods then
 end
 
 print("✅ JQHub fully loaded!")
+-- Confirmation Message
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "JQHub";
+        Text = "✅ Script loaded successfully!";
+        Duration = 5;
+    })
+end)
