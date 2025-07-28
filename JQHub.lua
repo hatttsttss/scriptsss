@@ -1,130 +1,98 @@
--- JQHub | All-in-One GUI (Toggle Edition)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+-- JQHub | Scrollable GUI with Toggles
 
--- Feature States
-getgenv().JQHubFeatures = {
+local Features = {
+    {Name = "WalkSpeed", ToggleKey = "WalkSpeed"},
+    {Name = "Aimbot", ToggleKey = "Aimbot"},
+    {Name = "ESP", ToggleKey = "ESP"},
+    {Name = "Fly", ToggleKey = "Fly"},
+    {Name = "GunMods", ToggleKey = "GunMods"},
+    {Name = "AutoFarm", ToggleKey = "AutoFarm"},
+}
+
+getgenv().JQHubSettings = getgenv().JQHubSettings or {
     WalkSpeed = false,
     Aimbot = false,
     ESP = false,
     Fly = false,
     GunMods = false,
-    AutoFarm = false,
+    AutoFarm = false
 }
 
--- UI Setup
-local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 200, 0, 300)
-Frame.Position = UDim2.new(0.05, 0, 0.2, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.BorderSizePixel = 0
-Frame.Name = "JQHubUI"
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "JQHub_UI"
 
--- Toggle Buttons
-local features = {"WalkSpeed", "Aimbot", "ESP", "Fly", "GunMods", "AutoFarm"}
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 200, 0, 250)
+MainFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
 
-for i, name in ipairs(features) do
-    local btn = Instance.new("TextButton", Frame)
-    btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.Position = UDim2.new(0, 10, 0, (i - 1) * 40 + 10)
+local Scroller = Instance.new("ScrollingFrame", MainFrame)
+Scroller.Size = UDim2.new(1, 0, 1, 0)
+Scroller.CanvasSize = UDim2.new(0, 0, 0, #Features * 45 + 10)
+Scroller.ScrollBarThickness = 6
+Scroller.BackgroundTransparency = 1
+
+local UIListLayout = Instance.new("UIListLayout", Scroller)
+UIListLayout.Padding = UDim.new(0, 5)
+
+for _, feature in pairs(Features) do
+    local btn = Instance.new("TextButton", Scroller)
+    btn.Size = UDim2.new(1, -10, 0, 40)
     btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold
     btn.TextSize = 18
-    btn.Text = name .. ": OFF"
+    btn.Text = feature.Name .. ": OFF"
 
     btn.MouseButton1Click:Connect(function()
-        local state = not JQHubFeatures[name]
-        JQHubFeatures[name] = state
-        btn.Text = name .. ": " .. (state and "ON" or "OFF")
-        print("[JQHub] " .. name .. " is now " .. (state and "ENABLED" or "DISABLED"))
-    end)
-end
+        local key = feature.ToggleKey
+        JQHubSettings[key] = not JQHubSettings[key]
+        btn.Text = feature.Name .. ": " .. (JQHubSettings[key] and "ON" or "OFF")
 
--- Feature Logic
--- Aimbot
-RunService.RenderStepped:Connect(function()
-    if not JQHubFeatures.Aimbot then return end
-    local closest, dist = nil, math.huge
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            local pos = Camera:WorldToViewportPoint(player.Character.Head.Position)
-            local mag = (Vector2.new(pos.X, pos.Y) - Camera.ViewportSize/2).Magnitude
-            if mag < dist then
-                dist = mag
-                closest = player
+        if key == "WalkSpeed" then
+            if JQHubSettings.WalkSpeed then
+                spawn(function()
+                    while JQHubSettings.WalkSpeed do
+                        local h = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                        if h then h.WalkSpeed = 22 end
+                        task.wait(1)
+                    end
+                end)
             end
-        end
-    end
-    if closest and closest.Character and closest.Character:FindFirstChild("Head") then
-        Camera.CFrame = CFrame.new(Camera.CFrame.Position, closest.Character.Head.Position)
-    end
-end)
-
--- WalkSpeed
-LocalPlayer.CharacterAdded:Connect(function(char)
-    char:WaitForChild("Humanoid")
-    while true do
-        if JQHubFeatures.WalkSpeed then
-            pcall(function()
-                char.Humanoid.WalkSpeed = 75
+        elseif key == "Aimbot" and JQHubSettings.Aimbot then
+            spawn(function()
+                local cam = workspace.CurrentCamera
+                local lp = game.Players.LocalPlayer
+                local function getClosest()
+                    local closest, dist = nil, math.huge
+                    for _, p in pairs(game.Players:GetPlayers()) do
+                        if p ~= lp and p.Character and p.Character:FindFirstChild("Head") then
+                            local pos = cam:WorldToViewportPoint(p.Character.Head.Position)
+                            local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)).Magnitude
+                            if mag < dist then
+                                dist = mag
+                                closest = p
+                            end
+                        end
+                    end
+                    return closest
+                end
+                game:GetService("RunService").RenderStepped:Connect(function()
+                    if not JQHubSettings.Aimbot then return end
+                    local target = getClosest()
+                    if target and target.Character:FindFirstChild("Head") then
+                        cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character.Head.Position)
+                    end
+                end)
             end)
-        else
-            pcall(function()
-                char.Humanoid.WalkSpeed = 16
-            end)
-        end
-        task.wait(1)
-    end
-end)
-
--- Fly
-local flying = false
-RunService.RenderStepped:Connect(function()
-    if JQHubFeatures.Fly and not flying then
-        flying = true
-        loadstring(game:HttpGet("https://pastebin.com/raw/s3pVWMaA"))()
-    elseif not JQHubFeatures.Fly and flying then
-        -- no easy universal "stop fly" — recommend reload char
-        flying = false
-    end
-end)
-
--- ESP
-local espLoaded = false
-RunService.RenderStepped:Connect(function()
-    if JQHubFeatures.ESP and not espLoaded then
-        espLoaded = true
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/teslamly2424/scripts/main/esp.lua"))()
-    end
-end)
-
--- GunMods
-RunService.RenderStepped:Connect(function()
-    if JQHubFeatures.GunMods then
-        for _,v in pairs(getgc(true)) do
-            if type(v) == "table" and rawget(v, "Ammo") then
-                v.Ammo = math.huge
-                v.StoredAmmo = math.huge
-                v.FireRate = 0.001
-                v.Recoil = 0
-            end
-        end
-    end
-end)
-
--- AutoFarm (placeholder)
-task.spawn(function()
-    while true do
-        if JQHubFeatures.AutoFarm then
-            print("[JQHub] Farming tick...")
-            -- add autofarm logic here
-        end
-        task.wait(3)
-    end
-end)
-
-print("✅ JQHub toggle GUI loaded!")
+        elseif key == "ESP" and JQHubSettings.ESP then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/teslamly2424/scripts/main/esp.lua"))()
+        elseif key == "Fly" and JQHubSettings.Fly then
+            loadstring(game:HttpGet("https://pastebin.com/raw/s3pVWMaA"))()
+        elseif key == "GunMods" and JQHubSettings.GunMods then
+            for _,v in pairs(getgc(true)) do
+                if type(v) == "table" and rawget(v, "Ammo") then
+                    v.Ammo = math.huge
+                    v.StoredAmmo = math.huge
+                    v.FireRate = 0.
