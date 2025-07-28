@@ -1,4 +1,4 @@
--- JQHub (Minimal Test + WalkSpeed)
+-- JQHub (Minimal Test + WalkSpeed 22)
 
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
@@ -12,7 +12,7 @@ print("✅ JQHub minimal test script is running!")
 
 -- WalkSpeed Feature
 local settings = {
-    WalkSpeed = 75
+    WalkSpeed = 22
 }
 
 spawn(function()
