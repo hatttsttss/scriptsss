@@ -2,7 +2,7 @@
 
 -- Configuration
 getgenv().JQHubSettings = {
-    Aimbot = true,
+    Aimbot = false,
     WalkSpeed = 100,
     AutoFarm = false,
     GunMods = true,
