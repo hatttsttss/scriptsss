@@ -1,42 +1,34 @@
--- JQHub ESP Script
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local function createESPBox(player)
-    if player == LocalPlayer then return end
-    local character = player.Character
-    if not character then return end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "JQHubESP"
-    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-    highlight.OutlineColor = Color3.new(1, 1, 1)
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-    highlight.Adornee = character
-    highlight.Parent = character
-end
-
--- Apply ESP to all players
-for _, player in ipairs(Players:GetPlayers()) do
-    createESPBox(player)
-end
-
--- Update ESP when new characters load
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        task.wait(1)
-        createESPBox(player)
-    end)
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    if player.Character then
-        local esp = player.Character:FindFirstChild("JQHubESP")
-        if esp then esp:Destroy() end
+-- Remove highlights from leaving players
+Players.PlayerRemoving:Connect(function(playerRemoved)
+    local character = playerRemoved.Character
+    if character then
+        removeHighlightFromCharacter(character)
     end
 end)
-
-print("[JQHub] ESP enabled")
-
+ 
+-- The following code may be deleted if you are using a custom GUI library. 
+ 
+-- Toggle ESP Button Text based on variable status
+toggleButton.MouseButton1Click:Connect(function()
+    _G.ESPToggle = not _G.ESPToggle
+    if _G.ESPToggle then
+        toggleButton.Text = "ESP ON"
+    else
+        toggleButton.Text = "ESP OFF"
+    end
+end)
+ 
+-- Initial button text
+if _G.ESPToggle then
+    toggleButton.Text = "ESP ON"
+else
+    toggleButton.Text = "ESP OFF"
+end
+ 
+-- Keybind to toggle GUI visibility
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.H and not gameProcessed then -- Change Enum.KeyCode.H to another key if you want to, e.g. Enum.KeyCode.P for "P" Key.
+        mainFrame.Visible = not mainFrame.Visible
+    end
+end)
