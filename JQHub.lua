@@ -2,12 +2,12 @@
 
 -- Settings
 getgenv().JQHubSettings = {
-    Aimbot = false,
+    Aimbot = enable,
     WalkSpeed = 75,
-    AutoFarm = false,
-    GunMods = false,
-    Fly = false,
-    ESP = false,
+    AutoFarm = enable,
+    GunMods = enable,
+    Fly = enable,
+    ESP = enable,
 }
 
 -- Aimbot (toggleable)
