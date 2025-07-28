@@ -6,8 +6,8 @@ getgenv().JQHubSettings = {
     WalkSpeed = 75,
     AutoFarm = false,
     GunMods = false,
-    Fly = true,
-    ESP = true,
+    Fly = false,
+    ESP = false,
 }
 
 -- Aimbot (toggleable)
