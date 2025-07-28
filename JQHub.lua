@@ -1,4 +1,4 @@
--- JQHub (Minimal Test)
+-- JQHub (Minimal Test + WalkSpeed)
 
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
@@ -17,6 +17,23 @@ local settings = {
 
 spawn(function()
     local player = game.Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    char:WaitForChild("Humanoid").WalkSpeed = settings.WalkSpeed
+    local function applySpeed()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            humanoid.WalkSpeed = settings.WalkSpeed
+            pcall(function()
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "JQHub",
+                    Text = "🏃 WalkSpeed set to " .. settings.WalkSpeed,
+                    Duration = 4
+                })
+            end)
+        else
+            warn("Humanoid not found")
+        end
+    end
+
+    applySpeed()
+    player.CharacterAdded:Connect(applySpeed)
 end)
