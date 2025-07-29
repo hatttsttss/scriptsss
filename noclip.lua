@@ -1,14 +1,31 @@
--- 🧱 MidnightHub NoClip (Standalone)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-
-local noclipEnabled = true -- Set to false to disable
-
-if noclipEnabled then
-    RunService.Stepped:Connect(function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid:ChangeState(11)
+-- MIDNIGHTHUB NOCLIP (REPLACEMENT)
+local NoClipConn
+CreateToggle("NoClip", function(state)
+    JQHubSettings.NoClip = state
+    if state then
+        NoClipConn = RunService.Stepped:Connect(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") and part.CanCollide == true then
+                        part.CanCollide = false
+                    end
+                end
+                char.Humanoid:ChangeState(11)
+            end
+        end)
+    else
+        if NoClipConn then
+            NoClipConn:Disconnect()
+            NoClipConn = nil
         end
-    end)
-end
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+end)
