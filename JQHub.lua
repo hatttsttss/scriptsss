@@ -197,30 +197,29 @@ CreateToggle("Dupe", function(state)
     end
 end)
 
--- ✅ FIXED INSTANT INTERACT
+-- ✅ UPDATED INSTANT INTERACT
 CreateToggle("Instant Interact", function(state)
     JQHubSettings.InstantInteract = state
-
     if state then
-        local function patchHoldTime()
-            for _, v in pairs(getgc(true)) do
-                if typeof(v) == "table" and rawget(v, "HoldTime") and type(v.HoldTime) == "number" then
-                    v.HoldTime = 0
+        local function patch()
+            for _, obj in pairs(getgc(true)) do
+                if typeof(obj) == "table" and rawget(obj, "HoldTime") then
+                    if type(obj.HoldTime) == "number" then
+                        obj.HoldTime = 0
+                    end
                 end
             end
         end
-
-        patchHoldTime()
         task.spawn(function()
             while JQHubSettings.InstantInteract do
-                patchHoldTime()
-                task.wait(1)
+                patch()
+                task.wait(0.1) -- faster loop
             end
         end)
     end
 end)
 
--- 🔄 Noclip (from GitHub file)
+-- Noclip GitHub Loader
 local NoClip = loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/main/noclip.lua"))()
 CreateToggle("NoClip", function(state)
     if state then
