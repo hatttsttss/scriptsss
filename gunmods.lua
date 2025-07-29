@@ -1,21 +1,27 @@
--- JQHub GunMods Script
-
-local applied = false
-local success = pcall(function()
-    for _, v in pairs(getgc(true)) do
-        if type(v) == "table" and rawget(v, "Ammo") and rawget(v, "FireRate") then
-            v.Ammo = math.huge
-            v.StoredAmmo = math.huge
-            v.FireRate = 0.001
-            v.Recoil = 0
-            applied = true
+CreateToggle("GunMods", function(state)
+    if state then
+        for _, obj in pairs(getgc(true)) do
+            if typeof(obj) == "table" then
+                if rawget(obj, "Ammo") then
+                    obj.Ammo = math.huge
+                    obj.StoredAmmo = math.huge
+                end
+                if rawget(obj, "Recoil") then
+                    obj.Recoil = 0
+                end
+                if rawget(obj, "Spread") then
+                    obj.Spread = 0
+                end
+                if rawget(obj, "ReloadTime") then
+                    obj.ReloadTime = 0
+                end
+                if rawget(obj, "FireRate") then
+                    obj.FireRate = 0
+                end
+                if rawget(obj, "Auto") ~= nil then
+                    obj.Auto = true
+                end
+            end
         end
     end
 end)
-
-if applied and success then
-    print("[JQHub] GunMods applied successfully!")
-else
-    warn("[JQHub] GunMods failed or no guns found.")
-end
-
