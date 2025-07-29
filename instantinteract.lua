@@ -1,16 +1,18 @@
-local function fastInteract()
-    for _, v in pairs(getgc(true)) do
-        if typeof(v) == "table" and rawget(v, "HoldTime") and typeof(v.HoldTime) == "number" then
-            v.HoldTime = 0
+-- Loop Instant Proximity Prompt By DIR (TheUberAccount_x)
+local Workspace = game:GetService("Workspace")
+ 
+local function updateProximityPrompts()
+    for i, v in ipairs(Workspace:GetDescendants()) do
+        if v.ClassName == "ProximityPrompt" then
+            v.HoldDuration = 0.0001
         end
     end
 end
-
-task.spawn(function()
-    while true do
-        if _G.InstantInteractEnabled then
-            fastInteract()
-        end
-        task.wait(0.25)
+ 
+updateProximityPrompts()
+ 
+Workspace.DescendantAdded:Connect(function(descendant)
+    if descendant.ClassName == "ProximityPrompt" then
+        descendant.HoldDuration = 0.0001
     end
 end)
