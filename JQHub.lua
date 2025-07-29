@@ -1,9 +1,8 @@
--- JQHub | Full GUI with Toggles, AutoFarm, Dupe, Teleport, Instant Interact, Box ESP, NoClip
+-- JQHub | Final GUI with Instant Interact Fix
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local JQHubSettings = {
@@ -18,7 +17,7 @@ local JQHubSettings = {
     NoClip = false,
 }
 
--- GUI
+-- GUI Setup
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "JQHub_UI"
 
@@ -30,7 +29,7 @@ MainFrame.BorderSizePixel = 0
 
 local Scroll = Instance.new("ScrollingFrame", MainFrame)
 Scroll.Size = UDim2.new(1, 0, 1, 0)
-Scroll.CanvasSize = UDim2.new(0, 0, 0, 1000)
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 800)
 Scroll.ScrollBarThickness = 6
 Scroll.BackgroundTransparency = 1
 
@@ -67,8 +66,7 @@ function CreateButton(name, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- === Features ===
-
+-- ========== TOGGLES ==========
 CreateToggle("WalkSpeed", function(state)
     JQHubSettings.WalkSpeed = state
     if state then
@@ -91,13 +89,11 @@ CreateToggle("Aimbot", function(state)
                 local closest, dist = nil, math.huge
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                        local pos, onScreen = cam:WorldToViewportPoint(p.Character.Head.Position)
-                        if onScreen then
-                            local mag = (Vector2.new(pos.X, pos.Y) - cam.ViewportSize/2).Magnitude
-                            if mag < dist then
-                                dist = mag
-                                closest = p
-                            end
+                        local pos = cam:WorldToViewportPoint(p.Character.Head.Position)
+                        local mag = (Vector2.new(pos.X, pos.Y) - cam.ViewportSize/2).Magnitude
+                        if mag < dist then
+                            dist = mag
+                            closest = p
                         end
                     end
                 end
@@ -116,30 +112,42 @@ end)
 
 CreateToggle("ESP", function(state)
     JQHubSettings.ESP = state
-
-    local function CreateESPBox(plr)
-        if plr == LocalPlayer then return end
-        if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
-        if plr.Character:FindFirstChild("ESPBox") then return end
-
-        local box = Instance.new("BoxHandleAdornment")
-        box.Name = "ESPBox"
-        box.Size = Vector3.new(4, 6, 2)
-        box.Adornee = plr.Character.HumanoidRootPart
-        box.Color3 = Color3.fromRGB(0, 255, 0)
-        box.AlwaysOnTop = true
-        box.ZIndex = 5
-        box.Transparency = 0.3
-        box.Parent = plr.Character
-    end
-
     if state then
-        for _, p in ipairs(Players:GetPlayers()) do CreateESPBox(p) end
+        local function CreateESPBox(plr)
+            if plr == LocalPlayer then return end
+            if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+            if plr.Character:FindFirstChild("ESPBox") then return end
+
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Size = Vector3.new(4, 6, 2)
+            box.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
+            box.Color3 = Color3.fromRGB(0, 255, 0)
+            box.AlwaysOnTop = true
+            box.ZIndex = 5
+            box.Transparency = 0.3
+            box.Parent = plr.Character
+        end
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            CreateESPBox(p)
+        end
+
         Players.PlayerAdded:Connect(function(p)
             p.CharacterAdded:Connect(function()
                 task.wait(1)
                 CreateESPBox(p)
             end)
+        end)
+
+        RunService.RenderStepped:Connect(function()
+            if not JQHubSettings.ESP then
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p.Character and p.Character:FindFirstChild("ESPBox") then
+                        p.Character.ESPBox:Destroy()
+                    end
+                end
+            end
         end)
     else
         for _, p in ipairs(Players:GetPlayers()) do
@@ -185,35 +193,32 @@ end)
 
 CreateToggle("Dupe", function(state)
     if state then
-        local trigger = workspace:FindFirstChild("DupeTrigger")
-        if trigger and trigger:FindFirstChildOfClass("ClickDetector") then
-            fireclickdetector(trigger:FindFirstChildOfClass("ClickDetector"))
-        end
+        fireclickdetector(workspace:FindFirstChild("DupeTrigger"):FindFirstChildOfClass("ClickDetector"))
     end
 end)
 
+-- ✅ FIXED INSTANT INTERACT
 CreateToggle("Instant Interact", function(state)
-    JQHubSettings.InstantInteract = state
     if state then
         for _, v in pairs(getgc(true)) do
-            if type(v) == "table" and rawget(v, "HoldTime") and typeof(v.HoldTime) == "number" then
+            if typeof(v) == "table" and rawget(v, "HoldTime") then
                 v.HoldTime = 0
             end
         end
     end
 end)
 
--- Load external NoClip
-local success, NoClip = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/main/noclip.lua"))()
+-- Noclip GitHub Loader
+local NoClip = loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/main/noclip.lua"))()
+CreateToggle("NoClip", function(state)
+    if state then
+        NoClip.Enable()
+    else
+        NoClip.Disable()
+    end
 end)
-if success and NoClip then
-    CreateToggle("NoClip", function(state)
-        if state then NoClip.Enable() else NoClip.Disable() end
-    end)
-end
 
--- Teleport Buttons
+-- ========== TELEPORT BUTTONS ==========
 local locations = {
     ["Dealership"] = Vector3.new(-125, 3, 550),
     ["Gun Store"] = Vector3.new(200, 3, 680),
@@ -231,5 +236,4 @@ for name, pos in pairs(locations) do
     end)
 end
 
-print("✅ JQHub GUI Loaded!")
-
+print("✅ JQHub Loaded with Instant Interact Fix")
