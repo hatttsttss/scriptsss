@@ -1,9 +1,8 @@
--- JQHub | Full GUI with Toggles, AutoFarm, Dupe, Teleport, Instant Interact
+-- JQHub | Full GUI with Toggles, AutoFarm, Dupe, Teleport, Instant Interact, Box ESP, NoClip
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
-local TeleportService = game:GetService("TeleportService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
@@ -31,7 +30,7 @@ MainFrame.BorderSizePixel = 0
 
 local Scroll = Instance.new("ScrollingFrame", MainFrame)
 Scroll.Size = UDim2.new(1, 0, 1, 0)
-Scroll.CanvasSize = UDim2.new(0, 0, 0, 600)
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 1000)
 Scroll.ScrollBarThickness = 6
 Scroll.BackgroundTransparency = 1
 
@@ -41,6 +40,7 @@ Layout.Padding = UDim.new(0, 5)
 function CreateToggle(name, callback)
     local btn = Instance.new("TextButton", Scroll)
     btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.Position = UDim2.new(0, 5, 0, 0)
     btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold
@@ -58,6 +58,7 @@ end
 function CreateButton(name, callback)
     local btn = Instance.new("TextButton", Scroll)
     btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.Position = UDim2.new(0, 5, 0, 0)
     btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSansBold
@@ -66,7 +67,8 @@ function CreateButton(name, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- ========== TOGGLES ==========
+-- === Features ===
+
 CreateToggle("WalkSpeed", function(state)
     JQHubSettings.WalkSpeed = state
     if state then
@@ -89,11 +91,13 @@ CreateToggle("Aimbot", function(state)
                 local closest, dist = nil, math.huge
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                        local pos = cam:WorldToViewportPoint(p.Character.Head.Position)
-                        local mag = (Vector2.new(pos.X, pos.Y) - cam.ViewportSize/2).Magnitude
-                        if mag < dist then
-                            dist = mag
-                            closest = p
+                        local pos, onScreen = cam:WorldToViewportPoint(p.Character.Head.Position)
+                        if onScreen then
+                            local mag = (Vector2.new(pos.X, pos.Y) - cam.ViewportSize/2).Magnitude
+                            if mag < dist then
+                                dist = mag
+                                closest = p
+                            end
                         end
                     end
                 end
@@ -113,42 +117,29 @@ end)
 CreateToggle("ESP", function(state)
     JQHubSettings.ESP = state
 
+    local function CreateESPBox(plr)
+        if plr == LocalPlayer then return end
+        if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+        if plr.Character:FindFirstChild("ESPBox") then return end
+
+        local box = Instance.new("BoxHandleAdornment")
+        box.Name = "ESPBox"
+        box.Size = Vector3.new(4, 6, 2)
+        box.Adornee = plr.Character.HumanoidRootPart
+        box.Color3 = Color3.fromRGB(0, 255, 0)
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+        box.Transparency = 0.3
+        box.Parent = plr.Character
+    end
+
     if state then
-        local function CreateESPBox(plr)
-            if plr == LocalPlayer then return end
-            if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
-            if plr.Character:FindFirstChild("ESPBox") then return end
-
-            local box = Instance.new("BoxHandleAdornment")
-            box.Name = "ESPBox"
-            box.Size = Vector3.new(4, 6, 2)
-            box.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
-            box.Color3 = Color3.fromRGB(0, 255, 0)
-            box.AlwaysOnTop = true
-            box.ZIndex = 5
-            box.Transparency = 0.3
-            box.Parent = plr.Character
-        end
-
-        for _, p in ipairs(Players:GetPlayers()) do
-            CreateESPBox(p)
-        end
-
+        for _, p in ipairs(Players:GetPlayers()) do CreateESPBox(p) end
         Players.PlayerAdded:Connect(function(p)
             p.CharacterAdded:Connect(function()
                 task.wait(1)
                 CreateESPBox(p)
             end)
-        end)
-
-        RunService.RenderStepped:Connect(function()
-            if not JQHubSettings.ESP then
-                for _, p in ipairs(Players:GetPlayers()) do
-                    if p.Character and p.Character:FindFirstChild("ESPBox") then
-                        p.Character.ESPBox:Destroy()
-                    end
-                end
-            end
         end)
     else
         for _, p in ipairs(Players:GetPlayers()) do
@@ -194,7 +185,10 @@ end)
 
 CreateToggle("Dupe", function(state)
     if state then
-        fireclickdetector(workspace:FindFirstChild("DupeTrigger"):FindFirstChildOfClass("ClickDetector"))
+        local trigger = workspace:FindFirstChild("DupeTrigger")
+        if trigger and trigger:FindFirstChildOfClass("ClickDetector") then
+            fireclickdetector(trigger:FindFirstChildOfClass("ClickDetector"))
+        end
     end
 end)
 
@@ -209,22 +203,17 @@ CreateToggle("Instant Interact", function(state)
     end
 end)
 
-CreateToggle("NoClip", function(state)
-    JQHubSettings.NoClip = state
-    if state then
-        RunService.Stepped:Connect(function()
-            if JQHubSettings.NoClip and LocalPlayer.Character then
-                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end)
-    end
+-- Load external NoClip
+local success, NoClip = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/main/noclip.lua"))()
 end)
+if success and NoClip then
+    CreateToggle("NoClip", function(state)
+        if state then NoClip.Enable() else NoClip.Disable() end
+    end)
+end
 
--- ========== TELEPORT BUTTONS ==========
+-- Teleport Buttons
 local locations = {
     ["Dealership"] = Vector3.new(-125, 3, 550),
     ["Gun Store"] = Vector3.new(200, 3, 680),
@@ -242,4 +231,5 @@ for name, pos in pairs(locations) do
     end)
 end
 
-print("✅ JQHub Full GUI Loaded")
+print("✅ JQHub GUI Loaded!")
+
