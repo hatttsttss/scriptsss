@@ -1,18 +1,23 @@
--- Loop Instant Proximity Prompt By DIR (TheUberAccount_x)
-local Workspace = game:GetService("Workspace")
- 
-local function updateProximityPrompts()
-    for i, v in ipairs(Workspace:GetDescendants()) do
-        if v.ClassName == "ProximityPrompt" then
-            v.HoldDuration = 0.0001
-        end
-    end
-end
- 
-updateProximityPrompts()
- 
-Workspace.DescendantAdded:Connect(function(descendant)
-    if descendant.ClassName == "ProximityPrompt" then
-        descendant.HoldDuration = 0.0001
+CreateToggle("Instant Interact", function(state)
+    JQHubSettings.InstantInteract = state
+    if state then
+        task.spawn(function()
+            while JQHubSettings.InstantInteract do
+                for _, tbl in ipairs(getgc(true)) do
+                    if type(tbl) == "table" then
+                        if rawget(tbl, "HoldTime") and type(tbl.HoldTime) == "number" and tbl.HoldTime > 0 then
+                            tbl.HoldTime = 0
+                        end
+                        if rawget(tbl, "RequiredTime") and type(tbl.RequiredTime) == "number" and tbl.RequiredTime > 0 then
+                            tbl.RequiredTime = 0
+                        end
+                        if rawget(tbl, "TimeRequired") and type(tbl.TimeRequired) == "number" and tbl.TimeRequired > 0 then
+                            tbl.TimeRequired = 0
+                        end
+                    end
+                end
+                task.wait(0.2)
+            end
+        end)
     end
 end)
