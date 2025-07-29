@@ -1,30 +1,48 @@
--- Simple ESP by JQHub
-local function createESP(plr)
-    if plr == game.Players.LocalPlayer then return end
-    local char = plr.Character or plr.CharacterAdded:Wait()
-    local box = Instance.new("BillboardGui", char:WaitForChild("Head"))
-    box.Name = "JQ_ESP"
-    box.Size = UDim2.new(4, 0, 0.5, 0)
-    box.AlwaysOnTop = true
-    local label = Instance.new("TextLabel", box)
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = plr.Name
-    label.TextColor3 = Color3.new(1, 0, 0)
-    label.TextStrokeTransparency = 0.5
-    label.TextScaled = true
-end
+CreateToggle("ESP", function(state)
+    JQHubSettings.ESP = state
 
-for _, plr in pairs(game.Players:GetPlayers()) do
-    if not plr.Character or not plr.Character:FindFirstChild("Head") then
-        plr.CharacterAdded:Wait()
+    if state then
+        local function CreateESPBox(plr)
+            if plr == LocalPlayer then return end
+            if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+            if plr.Character:FindFirstChild("ESPBox") then return end
+
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Size = Vector3.new(4, 6, 2)
+            box.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
+            box.Color3 = Color3.fromRGB(0, 255, 0)
+            box.AlwaysOnTop = true
+            box.ZIndex = 5
+            box.Transparency = 0.3
+            box.Parent = plr.Character
+        end
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            CreateESPBox(p)
+        end
+
+        Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function()
+                task.wait(1)
+                CreateESPBox(p)
+            end)
+        end)
+
+        RunService.RenderStepped:Connect(function()
+            if not JQHubSettings.ESP then
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p.Character and p.Character:FindFirstChild("ESPBox") then
+                        p.Character.ESPBox:Destroy()
+                    end
+                end
+            end
+        end)
+    else
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("ESPBox") then
+                p.Character.ESPBox:Destroy()
+            end
+        end
     end
-    createESP(plr)
-end
-
-game.Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function()
-        task.wait(1)
-        createESP(plr)
-    end)
 end)
