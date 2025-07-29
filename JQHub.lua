@@ -66,7 +66,7 @@ function CreateButton(name, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- ========== TOGGLES ==========
+-- TOGGLES
 CreateToggle("WalkSpeed", function(state)
     JQHubSettings.WalkSpeed = state
     if state then
@@ -197,7 +197,6 @@ CreateToggle("Dupe", function(state)
     end
 end)
 
--- ✅ UPDATED INSTANT INTERACT
 CreateToggle("Instant Interact", function(state)
     JQHubSettings.InstantInteract = state
     if state then
@@ -213,23 +212,31 @@ CreateToggle("Instant Interact", function(state)
         task.spawn(function()
             while JQHubSettings.InstantInteract do
                 patch()
-                task.wait(0.1) -- faster loop
+                task.wait(0.1)
             end
         end)
     end
 end)
 
--- Noclip GitHub Loader
-local NoClip = loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/main/noclip.lua"))()
+-- ✅ INLINE NoClip (replaces GitHub loader)
+local noclipConnection
 CreateToggle("NoClip", function(state)
+    JQHubSettings.NoClip = state
     if state then
-        NoClip.Enable()
+        noclipConnection = RunService.Stepped:Connect(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid:ChangeState(11)
+            end
+        end)
     else
-        NoClip.Disable()
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
     end
 end)
 
--- ========== TELEPORT BUTTONS ==========
+-- TELEPORT BUTTONS
 local locations = {
     ["Dealership"] = Vector3.new(-125, 3, 550),
     ["Gun Store"] = Vector3.new(200, 3, 680),
@@ -247,4 +254,4 @@ for name, pos in pairs(locations) do
     end)
 end
 
-print("✅ JQHub Loaded with Instant Interact Fix")
+print("✅ JQHub Loaded with Inline NoClip and Instant Interact Fix")
