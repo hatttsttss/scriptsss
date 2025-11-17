@@ -1,13 +1,50 @@
--- Key system
-local correctKey = "JQHUBKEY" -- Replace this with your actual key
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KeySystemGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = game.CoreGui
 
--- Prompt the user for input (Roblox safe method)
-print("Enter your key:")
-local inputKey = read()  -- Only works in some executors; for Roblox GUI you may need a TextBox
+-- Create Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
 
-if inputKey ~= correctKey then
-    error("Incorrect key! Script will not run.")
-end
+-- Create TextBox for key input
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(0, 280, 0, 50)
+textBox.Position = UDim2.new(0, 10, 0, 30)
+textBox.PlaceholderText = "Enter key here..."
+textBox.ClearTextOnFocus = true
+textBox.Text = ""
+textBox.Parent = frame
+
+-- Create Submit Button
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 280, 0, 40)
+button.Position = UDim2.new(0, 10, 0, 90)
+button.Text = "Submit"
+button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Parent = frame
+
+-- Correct key
+local correctKey = "JQHUBKEY"
+
+-- Button click event
+button.MouseButton1Click:Connect(function()
+    if textBox.Text == correctKey then
+        frame:Destroy()
+        print("Key correct! Running script...")
+        -- Put your FFF script code here
+    else
+        textBox.Text = ""
+        textBox.PlaceholderText = "Incorrect key!"
+    end
+end)
+
 -- JQ HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
