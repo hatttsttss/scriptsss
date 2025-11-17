@@ -3616,7 +3616,7 @@ local function loadMainMenu()
     local main = lib:Load({
         Title = "Steal a Brainrot 〢 JQ HUB",
         ToggleButton = "rbxassetid://105059922903197",
-        BindGui = Enum.KeyCode.RightControl,
+        BindGui = Enum.KeyCode.t,
     })
 
     if main and main.Instance then
