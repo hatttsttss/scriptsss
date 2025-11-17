@@ -1,3 +1,13 @@
+-- Key system
+local correctKey = "JQHUBKEY" -- Replace this with your actual key
+
+-- Prompt the user for input (Roblox safe method)
+print("Enter your key:")
+local inputKey = read()  -- Only works in some executors; for Roblox GUI you may need a TextBox
+
+if inputKey ~= correctKey then
+    error("Incorrect key! Script will not run.")
+end
 -- JQ HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
