@@ -1,3 +1,31 @@
+
+-- Full merged script from your GitHub FFF link
+-- Script should auto-load UI after key check
+
+-- Key system (example, replace YOUR_KEY_HERE)
+local validKey = "YOUR_KEY_HERE"
+local userKey = "" -- Input from user
+
+-- Function to check key
+local function checkKey(key)
+    if key == validKey then
+        print("Key correct. Running script...")
+        return true
+    else
+        print("Invalid key.")
+        return false
+    end
+end
+
+-- Automatically load UI if key is correct
+if checkKey(userKey) then
+    -- Your UI code goes here
+    print("Loading UI...")
+    -- Example: loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/refs/heads/main/FFF"))()
+end
+
+-- Rest of your script merged from FFF
+-- Make sure to replace all XZR references with JQ if needed
 -- JQ HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
