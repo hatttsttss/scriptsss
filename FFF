@@ -1,69 +1,23 @@
 -- Correct key
 local correctKey = "YOUR_KEY_HERE" -- replace with your actual key
+-- After loading the script
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/refs/heads/main/FFF"))()
 
--- Prompt user for key
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+-- Wait a moment for script to initialize
+task.wait(1)
 
--- Simple prompt function
-local function getKey()
-    local key = player:WaitForChild("PlayerGui"):FindFirstChild("KeyPrompt")
-    if key then key:Destroy() end
+-- Simulate RightControl press
+local UserInputService = game:GetService("UserInputService")
+local InputBegan = Instance.new("BindableEvent")
 
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "KeyPrompt"
-    ScreenGui.Parent = player:WaitForChild("PlayerGui")
-
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 300, 0, 150)
-    Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.Parent = ScreenGui
-
-    local TextBox = Instance.new("TextBox")
-    TextBox.Size = UDim2.new(0, 200, 0, 50)
-    TextBox.Position = UDim2.new(0.5, -100, 0.3, -25)
-    TextBox.PlaceholderText = "Enter Key"
-    TextBox.Parent = Frame
-
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0, 200, 0, 50)
-    Button.Position = UDim2.new(0.5, -100, 0.7, -25)
-    Button.Text = "Submit"
-    Button.Parent = Frame
-
-    local inputKey
-    local done = Instance.new("BindableEvent")
-    Button.MouseButton1Click:Connect(function()
-        inputKey = TextBox.Text
-        done:Fire()
-    end)
-
-    done.Event:Wait()
-    ScreenGui:Destroy()
-    return inputKey
-end
-
--- Get key from user
-local userKey = getKey()
-
--- Validate key
-if userKey ~= correctKey then
-    warn("Incorrect key! Script stopped.")
-    return
-end
-
--- Key is correct, load original FFF script
-local success, lib = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/hatttsttss/scriptsss/refs/heads/main/FFF"))()
+InputBegan.Event:Connect(function(input, processed)
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        -- do nothing (FFF listens for this)
+    end
 end)
 
-if success and lib and lib.Open then
-    lib:Open() -- automatically open FFF menu
-    print("Key correct! Script loaded and menu opened.")
-else
-    warn("Failed to load script.")
-end
+-- Fire RightControl event
+UserInputService.InputBegan:Fire({KeyCode = Enum.KeyCode.RightControl}, false)
 -- JQ HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
