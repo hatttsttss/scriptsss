@@ -1,0 +1,4171 @@
+-- XZX HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
+local player = game:GetService("Players").LocalPlayer
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Wait for game to load
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+-- Wait for player
+if not player then
+    game:GetService("Players").PlayerAdded:Wait()
+    player = game:GetService("Players").LocalPlayer
+end
+
+-- Wait for PlayerGui
+if not player:FindFirstChild("PlayerGui") then
+    player:WaitForChild("PlayerGui")
+end
+
+-- Global variables with menu protection
+local lib = nil
+local mainMenu = nil
+local menuLoaded = false
+local menuLoadInProgress = false
+local menuLoadAttempts = 0
+local MAX_MENU_ATTEMPTS = 2
+
+-- Cleanup any existing menus first
+pcall(function()
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if playerGui then
+        for _, gui in pairs(playerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and (gui.Name:find("XZX") or gui.Name:find("Main") or gui.Name:find("Library")) then
+                gui:Destroy()
+            end
+        end
+    end
+end)
+
+-- GUI CUSTOMIZATION VARIABLES (PERSISTENT)
+local GuiSettings = {
+    ThemeColor = Color3.fromRGB(0, 170, 255),
+    BackgroundTransparency = 0.1,
+    TextColor = Color3.fromRGB(255, 255, 255),
+    AccentColor = Color3.fromRGB(0, 255, 0),
+    MenuPosition = UDim2.new(0.5, -175, 0.5, -200),
+    MenuSize = UDim2.new(0, 350, 0, 400),
+    HideWatermark = false,
+    NotificationDuration = 3,
+    AutoSaveSettings = false,
+    ShowWelcomeMessage = true
+}
+
+-- GRAPHICS SETTINGS - PROPER ROBLOX CONTROLS (PERSISTENT)
+local GraphicsSettings = {
+    QualityLevel = 3, -- 1-10 scale (Roblox graphics quality)
+    Shadows = true,
+    AntiAliasing = true,
+    TextureQuality = "Medium",
+    RenderDistance = 500,
+    Fullbright = false,
+    FrameRateLimit = 60,
+    VSync = false,
+    MeshPartDetail = "Medium",
+    ParticleQuality = "Medium",
+    EnhancedGraphics = "None" -- None, Low, Medium, High, Extreme
+}
+
+-- SECRET BRAINROT NAMES
+local SecretBrainrotNames = {
+    "La Vacca Saturno Saturnita",
+    "Bisonte Giuppitere",
+    "Karkerkar Kurkur",
+    "Los Matteos",
+    "Trenostruzzo Turbo",
+    "Jackorilla",
+    "Sammyni Spyderini",
+    "Torrtuginni Dragonfrutini",
+    "Dul Dul Dul",
+    "Blackhole Goat",
+    "Chachechi",
+    "Agarrini la Palini",
+    "Los Spyderinis",
+    "Fragola la la la",
+    "Extinct Tralalero",
+    "La Cucaracha",
+    "Los Tralaleritos",
+    "Los Tortus",
+    "Zombie Tralala",
+    "Vulturino Skeletono",
+    "Boatito Auratito",
+    "Guerriro Digitale",
+    "Yess my examine",
+    "La Karkerkar Combinasion",
+    "Extinct Matteo",
+    "Las Tralaleritas",
+    "Pumpkini Spyderini",
+    "Job Job Job Sahur",
+    "Frankentteo",
+    "Karker Sahur",
+    "Las Vaquitas Saturnitas",
+    "Los Karkeritos",
+    "La Vacca Jacko Linterino",
+    "Trickolino",
+    "Graipuss Medussi",
+    "Perrito Burrito",
+    "Noo My Hotspot",
+    "Los Jobcitos",
+    "Noo my examine",
+    "La Sahur Combinasion",
+    "Telemorte",
+    "To To To Sahur",
+    "Pot Hotspot",
+    "Horegini Boom",
+    "Quesadilla Crocodila",
+    "Pot Pumpkin",
+    "Chicleteira Bicicleteira",
+    "Quesadillo Vampiro",
+    "Chicleteirina Bicicleteirina",
+    "Burrito Bandito",
+    "Noo my Candy",
+    "Los Nooo My Hotspotsitos",
+    "Rang Ring Bus",
+    "Los Chicleteiras",
+    "La Grande Combinasion",
+    "Mariachi Corazoni",
+    "Los Combinasionas",
+    "Nuclearo Dinossauro",
+    "Tacorita Bicicleta",
+    "Las Sis",
+    "Los Hotspotsitos",
+    "Los Spooky Combinasionas",
+    "Money Money Puggy",
+    "Los Mobilis",
+    "Celularcini Viciosini",
+    "Los 67",
+    "La Extinct Grande",
+    "Los Bros",
+    "La Spooky Grande",
+    "Chillin Chili",
+    "Chipso and Queso",
+    "Mieteteira Bicicleteira",
+    "Tralaledon",
+    "Esok Sekolah",
+    "Los Primos",
+    "Eviledon",
+    "Los Tacoritas",
+    "Tang Tang Keletang",
+    "Ketupat Kepat",
+    "Tictac Sahur",
+    "La Supreme Combination",
+    "Ketchuru and Masturu",
+    "Garama and Madundung",
+    "Spaghetti Tualetti",
+    "Spooky and Pumpky",
+    "La Casa Boo",
+    "La Secret Combinasion",
+    "Burguro And Fryuro",
+    "Headless Horseman",
+    "Dragon Cannelloni"
+}
+
+-- BRAINROT GODS NAMES
+local BrainrotGodsNames = {
+    "Cocofanto Elefanto",
+    "Antonio",
+    "Girafa Celestre",
+    "Gattatino Nyanino",
+    "Chihuanini Taconini",
+    "Tralalero Tralala",
+    "Matteo",
+    "Los Crocodillitos",
+    "Tigroligre Frutonni",
+    "Espresso Signora",
+    "Odin Din Din Dun",
+    "Unclito Samito",
+    "Tipi Topi Taco",
+    "Alessio",
+    "Tralalita Tralala",
+    "Tukanno Bananno",
+    "Orcalero Orcala",
+    "Extinct Ballerina",
+    "Trenostruzzo Turbo",
+    "Urubini Flamenguini",
+    "Capi Taco",
+    "Gattito Tacoto",
+    "Trippi Troppi Troppa Trippa",
+    "Las Cappuchinas",
+    "Ballerino Lololo",
+    "Bulbito Bandito Traktorito",
+    "Los Tungtungtungcitos",
+    "Pakrahmatmamat",
+    "Los Bombinitos",
+    "Piccione Macchina",
+    "Brr es Teh Patipum",
+    "Bombardini Tortini",
+    "Tractoro Dinosauro",
+    "Los Orcalitos",
+    "Crabbo Limonetta",
+    "Cacasito Satalito",
+    "Orcalita Orcala",
+    "Tartaruga Cisterna",
+    "Corn Corn Corn Sahur",
+    "Squalanana",
+    "Dug Dug Dug",
+    "Los Tipi Tacos",
+    "Piccionetta Macchina",
+    "Mastodontico Telepiedone",
+    "Anpali Babel",
+    "Belula Beluga",
+    "Pop Pop Sahur"
+}
+
+-- BRAINROT FINDER CONFIG
+local BrainrotFinderConfig = {
+    webhook_url = "https://discord.com/api/webhooks/1434196175124303972/wZxi86RCfk2dY1UabKcymLT6gEV9TQTOumh97lfRRWAULv9_fVQIo64KbfbkfWy_WMRc",
+    brainrots_to_find = {
+        ["Graipuss Medussi"] = true,
+        ["La Vacca Saturno Saturnita"] = true,
+        ["Los Tralaleritos"] = true,
+        ["La Grande Combinasion"] = true,
+    },
+    hop_after_brainrot_left = true
+}
+
+-- BRAINROT FINDER ESP SYSTEM
+local BrainrotESPEnabled = false
+local brainrotESPConnections = {}
+local brainrotESPObjects = {}
+
+-- DESYNC SYSTEM
+local DesyncEnabled = false
+
+-- Filter state management
+local FilterStates = {
+    Secrets = false,
+    Gods = false
+}
+
+-- XZX BOOSTS SYSTEM
+local XZXBoosts = {
+    Enabled = false,
+    OriginalValues = {
+        Gravity = workspace.Gravity,
+        WalkSpeed = 16,
+        JumpPower = 50
+    },
+    CurrentValues = {
+        Gravity = 0,
+        Speed = 0,
+        Jump = 0
+    }
+}
+
+-- FLY SYSTEM
+local FlyEnabled = false
+local flyConnection = nil
+local flySpeed = 50
+local bodyVelocity = nil
+local bodyGyro = nil
+
+-- GOD MODE
+local GodModeEnabled = false
+
+-- ESP SYSTEM
+local ESPEnabled = false
+local espFolder = Instance.new("Folder", CoreGui)
+espFolder.Name = "ESPFolder"
+
+-- MINI MAP SYSTEM
+local MiniMapEnabled = false
+local miniMapGui = nil
+local playerDots = {}
+local miniMapConnection = nil
+
+-- DELIVERY STEAL SYSTEM
+local DeliveryStealEnabled = false
+local deliveryConnection = nil
+
+-- AUTO JOIN SYSTEM
+_G.AutoJoinEnabled = false
+
+-- XZX PLATFORM (STANDARD)
+local XZXPlatformEnabled = false
+local xzxPlatform = nil
+local platformGUI = nil
+local platformConnection = nil
+
+-- WALL CLIMB SYSTEM
+local WallClimbEnabled = false
+local wallClimbConnection = nil
+local wallClimbSpeed = 20
+local wallDistance = 5
+local maxClimbHeight = 50
+local climbBaseY = nil
+local isClimbing = false
+local stopClimb = false
+
+-- Store spawn and checkpoint positions
+local playerSpawnPosition = Vector3.new(0, 25, 0)
+local checkpointPosition = Vector3.new(0, 25, 0)
+
+-- Function to create XZX HUB center label
+local function createXZXHubCenterLabel()
+    -- Services
+    local Players = game:GetService("Players")
+    local TweenService = game:GetService("TweenService")
+    local player = Players.LocalPlayer
+    local PlayerGui = player:WaitForChild("PlayerGui")
+
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "XZXHubCenter"
+    screenGui.Parent = PlayerGui
+
+    -- Create TextLabel (smaller and centered)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 120, 0, 30)
+    label.Position = UDim2.new(0.5, 0, 0.5, 0)
+    label.AnchorPoint = Vector2.new(0.5, 0.5)
+    label.BackgroundTransparency = 1
+    label.Text = "XZX HUB"
+    label.TextColor3 = Color3.fromRGB(0, 0, 0)
+    label.TextScaled = true
+    label.Font = Enum.Font.GothamBold
+    label.Parent = screenGui
+
+    -- Add UIStroke for glow
+    local stroke = Instance.new("UIStroke")
+    stroke.Parent = label
+    stroke.Color = Color3.fromRGB(255, 255, 255) -- white glow
+    stroke.Thickness = 3
+    stroke.Transparency = 0.3
+
+    -- Create pulsing glow effect
+    local tweenInfo = TweenInfo.new(
+        1, -- duration
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut,
+        -1, -- repeat infinitely
+        true -- reverse after each tween
+    )
+
+    local goal = {Transparency = 0.7} -- glow fades in and out
+
+    local pulseTween = TweenService:Create(stroke, tweenInfo, goal)
+    pulseTween:Play()
+
+    return screenGui
+end
+
+local function createXZXPlatform()
+    if xzxPlatform then
+        xzxPlatform:Destroy()
+        xzxPlatform = nil
+    end
+    
+    if platformGUI then
+        platformGUI:Destroy()
+        platformGUI = nil
+    end
+    
+    xzxPlatform = Instance.new("Part")
+    xzxPlatform.Size = Vector3.new(12, 1, 12)
+    xzxPlatform.Anchored = true
+    xzxPlatform.Color = Color3.fromRGB(10, 10, 10)
+    xzxPlatform.Material = Enum.Material.SmoothPlastic
+    xzxPlatform.CanCollide = true
+    xzxPlatform.Name = "XZXPlatform"
+    xzxPlatform.Parent = workspace
+
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = xzxPlatform
+    highlight.FillTransparency = 1
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.OutlineTransparency = 0.25
+
+    local surfaceGui = Instance.new("SurfaceGui")
+    surfaceGui.Parent = xzxPlatform
+    surfaceGui.Face = Enum.NormalId.Top
+    surfaceGui.CanvasSize = Vector2.new(500, 500)
+    surfaceGui.AlwaysOnTop = true
+
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1, 0, 1, 0)
+    text.BackgroundTransparency = 1
+    text.Text = "XZX"
+    text.TextColor3 = Color3.fromRGB(255, 255, 255)
+    text.Font = Enum.Font.GothamBold
+    text.TextScaled = true
+    text.Parent = surfaceGui
+
+    task.spawn(function()
+        while xzxPlatform and xzxPlatform.Parent do
+            local pulse = math.sin(tick() * 2) * 0.5 + 0.5
+            text.TextTransparency = 0.15 + (1 - pulse) * 0.25
+            task.wait(0.05)
+        end
+    end)
+
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        local baseY = hrp.Position.Y - 5
+        xzxPlatform.Position = Vector3.new(hrp.Position.X, baseY, hrp.Position.Z)
+    else
+        xzxPlatform.Position = Vector3.new(0, 25, 0)
+    end
+
+    platformGUI = Instance.new("ScreenGui")
+    platformGUI.Name = "XZXPlatformGUI"
+    platformGUI.ResetOnSpawn = false
+    platformGUI.Parent = player:WaitForChild("PlayerGui")
+    platformGUI.DisplayOrder = 5
+
+    local function createButton(text, offsetY)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 60, 0, 30)
+        button.Position = UDim2.new(0, 20, 0.4, offsetY)
+        button.Text = text
+        button.Font = Enum.Font.GothamBold
+        button.TextScaled = true
+        button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Parent = platformGUI
+        return button
+    end
+
+    local upButton = createButton("▲", -40)
+    local downButton = createButton("▼", 40)
+
+    local moveStep = 5
+    local tweenTime = 0.4
+    local moving = false
+
+    local function movePlatform(direction)
+        if moving or not xzxPlatform then return end
+        moving = true
+        
+        local goalY = xzxPlatform.Position.Y + (direction * moveStep)
+        local goal = {Position = Vector3.new(xzxPlatform.Position.X, goalY, xzxPlatform.Position.Z)}
+        local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+        local tween = TweenService:Create(xzxPlatform, tweenInfo, goal)
+        tween:Play()
+        tween.Completed:Wait()
+        
+        moving = false
+    end
+
+    upButton.MouseButton1Click:Connect(function() movePlatform(1) end)
+    downButton.MouseButton1Click:Connect(function() movePlatform(-1) end)
+
+    if platformConnection then
+        platformConnection:Disconnect()
+    end
+    
+    platformConnection = RunService.Heartbeat:Connect(function()
+        if not xzxPlatform or not XZXPlatformEnabled then return end
+        
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local hrp = character.HumanoidRootPart
+            local currentY = xzxPlatform.Position.Y
+            local newPos = Vector3.new(hrp.Position.X, currentY, hrp.Position.Z)
+            xzxPlatform.Position = newPos
+            
+            local platformTopY = xzxPlatform.Position.Y + xzxPlatform.Size.Y/2
+            local distance = hrp.Position.Y - platformTopY
+            
+            if distance < 0 then
+                hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+                hrp.Position = Vector3.new(hrp.Position.X, platformTopY + 2, hrp.Position.Z)
+            end
+        end
+    end)
+
+    return xzxPlatform
+end
+
+local function toggleXZXPlatform(value)
+    XZXPlatformEnabled = value
+    
+    if XZXPlatformEnabled then
+        createXZXPlatform()
+        if lib then
+            lib:Notification("XZX Platform", "✅ XZX Platform activated with controls!", 3)
+        else
+            showNotification("XZX Platform", "✅ XZX Platform activated with controls!", 3)
+        end
+    else
+        if xzxPlatform then
+            xzxPlatform:Destroy()
+            xzxPlatform = nil
+        end
+        if platformGUI then
+            platformGUI:Destroy()
+            platformGUI = nil
+        end
+        if platformConnection then
+            platformConnection:Disconnect()
+            platformConnection = nil
+        end
+        if lib then
+            lib:Notification("XZX Platform", "❌ XZX Platform disabled", 2)
+        else
+            showNotification("XZX Platform", "❌ XZX Platform disabled", 2)
+        end
+    end
+end
+
+-- WALL CLIMB SYSTEM FUNCTIONS
+local function getCharacter()
+    local char = player.Character
+    if not char then
+        char = player.CharacterAdded:Wait()
+    end
+    return char
+end
+
+local function getHumanoidAndRoot(char)
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local humanoid = char:WaitForChild("Humanoid")
+    return humanoid, hrp
+end
+
+local function onTouch(part)
+    if part.Name == "Border" then
+        stopClimb = true
+    end
+end
+
+local function toggleWallClimb(value)
+    WallClimbEnabled = value
+    
+    if wallClimbConnection then
+        wallClimbConnection:Disconnect()
+        wallClimbConnection = nil
+    end
+    
+    if not WallClimbEnabled then
+        climbBaseY = nil
+        isClimbing = false
+        stopClimb = false
+        if lib then
+            lib:Notification("WALL CLIMB", "❌ Wall Climb disabled", 2)
+        else
+            showNotification("WALL CLIMB", "❌ Wall Climb disabled", 2)
+        end
+        return
+    end
+    
+    if lib then
+        lib:Notification("WALL CLIMB", "✅ Wall Climb enabled!\nMove towards walls to climb", 3)
+    else
+        showNotification("WALL CLIMB", "✅ Wall Climb enabled!\nMove towards walls to climb", 3)
+    end
+    
+    -- Connect touch event
+    local char = getCharacter()
+    local humanoid, hrp = getHumanoidAndRoot(char)
+    hrp.Touched:Connect(onTouch)
+    
+    wallClimbConnection = RunService.RenderStepped:Connect(function(deltaTime)
+        if not WallClimbEnabled then return end
+        
+        local char = player.Character
+        if not char then return end
+        
+        local humanoid, hrp = getHumanoidAndRoot(char)
+        if humanoid.Health <= 0 then return end
+
+        -- Stop climb if touching border
+        if stopClimb then
+            climbBaseY = nil
+            isClimbing = false
+            return
+        end
+
+        -- Cast a ray in front of the player to detect walls
+        local rayParams = RaycastParams.new()
+        rayParams.FilterDescendantsInstances = {char}
+        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+        
+        local wallRay = workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * wallDistance, rayParams)
+        
+        if wallRay then
+            if not climbBaseY then
+                climbBaseY = hrp.Position.Y
+            end
+            if hrp.Position.Y < climbBaseY + maxClimbHeight then
+                isClimbing = true
+                local vel = hrp.Velocity
+                hrp.Velocity = Vector3.new(vel.X, wallClimbSpeed, vel.Z)
+            end
+        else
+            climbBaseY = nil
+            isClimbing = false
+        end
+    end)
+end
+
+-- PERSISTENT SETTINGS SYSTEM
+local function saveAllSettings()
+    pcall(function()
+        if player then
+            -- Save GUI settings
+            player:SetAttribute("XZX_ThemeColor_R", GuiSettings.ThemeColor.R)
+            player:SetAttribute("XZX_ThemeColor_G", GuiSettings.ThemeColor.G)
+            player:SetAttribute("XZX_ThemeColor_B", GuiSettings.ThemeColor.B)
+            player:SetAttribute("XZX_HideWatermark", GuiSettings.HideWatermark)
+            player:SetAttribute("XZX_NotificationDuration", GuiSettings.NotificationDuration)
+            player:SetAttribute("XZX_AutoSaveSettings", GuiSettings.AutoSaveSettings)
+            player:SetAttribute("XZX_ShowWelcomeMessage", GuiSettings.ShowWelcomeMessage)
+            
+            -- Save Graphics settings
+            player:SetAttribute("XZX_QualityLevel", GraphicsSettings.QualityLevel)
+            player:SetAttribute("XZX_Shadows", GraphicsSettings.Shadows)
+            player:SetAttribute("XZX_AntiAliasing", GraphicsSettings.AntiAliasing)
+            player:SetAttribute("XZX_RenderDistance", GraphicsSettings.RenderDistance)
+            player:SetAttribute("XZX_Fullbright", GraphicsSettings.Fullbright)
+            player:SetAttribute("XZX_FrameRateLimit", GraphicsSettings.FrameRateLimit)
+            player:SetAttribute("XZX_VSync", GraphicsSettings.VSync)
+            player:SetAttribute("XZX_ParticleQuality", GraphicsSettings.ParticleQuality)
+            player:SetAttribute("XZX_EnhancedGraphics", GraphicsSettings.EnhancedGraphics)
+            
+            player:SetAttribute("XZX_MenuLoaded", true)
+            player:SetAttribute("XZX_MenuLastOpen", os.time())
+        end
+    end)
+end
+
+local function loadAllSettings()
+    pcall(function()
+        if player then
+            -- Load GUI settings
+            local themeR = player:GetAttribute("XZX_ThemeColor_R")
+            local themeG = player:GetAttribute("XZX_ThemeColor_G")
+            local themeB = player:GetAttribute("XZX_ThemeColor_B")
+            if themeR and themeG and themeB then
+                GuiSettings.ThemeColor = Color3.new(themeR, themeG, themeB)
+            end
+            
+            GuiSettings.HideWatermark = player:GetAttribute("XZX_HideWatermark") or false
+            GuiSettings.NotificationDuration = player:GetAttribute("XZX_NotificationDuration") or 3
+            GuiSettings.AutoSaveSettings = player:GetAttribute("XZX_AutoSaveSettings") or false
+            GuiSettings.ShowWelcomeMessage = player:GetAttribute("XZX_ShowWelcomeMessage") or true
+            
+            -- Load Graphics settings
+            GraphicsSettings.QualityLevel = player:GetAttribute("XZX_QualityLevel") or 3
+            GraphicsSettings.Shadows = player:GetAttribute("XZX_Shadows") ~= false
+            GraphicsSettings.AntiAliasing = player:GetAttribute("XZX_AntiAliasing") ~= false
+            GraphicsSettings.RenderDistance = player:GetAttribute("XZX_RenderDistance") or 500
+            GraphicsSettings.Fullbright = player:GetAttribute("XZX_Fullbright") or false
+            GraphicsSettings.FrameRateLimit = player:GetAttribute("XZX_FrameRateLimit") or 60
+            GraphicsSettings.VSync = player:GetAttribute("XZX_VSync") or false
+            GraphicsSettings.ParticleQuality = player:GetAttribute("XZX_ParticleQuality") or "Medium"
+            GraphicsSettings.EnhancedGraphics = player:GetAttribute("XZX_EnhancedGraphics") or "None"
+            
+            menuLoaded = player:GetAttribute("XZX_MenuLoaded") or false
+        end
+    end)
+end
+
+-- CINEMATIC XZX INTRO WITH SMOOTH FADE (EXTENDED BY 2 SECONDS)
+local function showXZXIntro(callback)
+    local TS = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
+    local plr = game.Players.LocalPlayer
+
+    local gui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    gui.Name = "XZX_RotatingIntroSmoothFade"
+
+    -- Background container (rotates)
+    local bgContainer = Instance.new("Frame", gui)
+    bgContainer.Size = UDim2.new(1.1,0,1.1,0) -- expand 10%
+    bgContainer.Position = UDim2.new(0.5,0,0.5,0)
+    bgContainer.AnchorPoint = Vector2.new(0.5,0.5)
+    bgContainer.BackgroundTransparency = 1
+    bgContainer.Rotation = 0
+
+    local bg = Instance.new("Frame", bgContainer)
+    bg.Size = UDim2.new(1,0,1,0)
+    bg.Position = UDim2.new(0.5,0,0.5,0)
+    bg.AnchorPoint = Vector2.new(0.5,0.5)
+    bg.BackgroundColor3 = Color3.new(0,0,0)
+    bg.BackgroundTransparency = 0
+
+    -- Ribbons
+    local ribbons = {}
+    for i = 1, 3 do
+        local r = Instance.new("Frame", bgContainer)
+        r.AnchorPoint = Vector2.new(0.5,0.5)
+        r.Position = UDim2.new(0.5,0,0.5,0)
+        r.Size = UDim2.new(0,0,1.3,0)
+        r.BackgroundColor3 = Color3.new(1,1,1)
+        r.BorderSizePixel = 0
+        r.BackgroundTransparency = 0.2 + (i-1)*0.1
+        r.Rotation = -15 - (i-1)*5
+        ribbons[i] = r
+    end
+
+    -- Beam
+    local beam = Instance.new("Frame", bgContainer)
+    beam.AnchorPoint = Vector2.new(0.5,0.5)
+    beam.Position = UDim2.new(0.5,0,0.5,0)
+    beam.Size = UDim2.new(0.63,0,0.105,0)
+    beam.BackgroundColor3 = Color3.new(1,1,1)
+    beam.BackgroundTransparency = 0.2
+    beam.BorderSizePixel = 0
+
+    -- Logo
+    local logo = Instance.new("TextLabel", gui)
+    logo.Size = UDim2.fromScale(1,1)
+    logo.BackgroundTransparency = 1
+    logo.Text = "XZX HUB"
+    logo.TextColor3 = Color3.new(0,0,0)
+    logo.Font = Enum.Font.GothamBlack
+    logo.TextScaled = true
+    logo.TextTransparency = 1
+    logo.ZIndex = 20
+    logo.AnchorPoint = Vector2.new(0.5,0.5)
+    logo.Position = UDim2.fromScale(0.5,0.5)
+
+    -- Glow layers
+    local glows = {}
+    for i=1,3 do
+        local glow = logo:Clone()
+        glow.Parent = gui
+        glow.TextColor3 = Color3.new(1,1,1)
+        glow.ZIndex = 10
+        glow.TextTransparency = 0.7 - (i-1)*0.2
+        glow.Size = UDim2.fromScale(1 + i*0.025,1 + i*0.025)
+        glow.AnchorPoint = Vector2.new(0.5,0.5)
+        glow.Position = UDim2.fromScale(0.5,0.5)
+        table.insert(glows, glow)
+    end
+
+    -- Flash
+    local flash = Instance.new("Frame", gui)
+    flash.Size = UDim2.fromScale(1.1,1.1)
+    flash.BackgroundColor3 = Color3.new(1,1,1)
+    flash.BackgroundTransparency = 1
+    flash.ZIndex = 50
+
+    -- Particles function
+    local function spawnParticle()
+        local p = Instance.new("Frame")
+        p.Size = UDim2.new(0, math.random(4,12), 0, math.random(2,6))
+        p.Position = UDim2.new(math.random(),0,math.random(),0)
+        p.BackgroundColor3 = (math.random() > 0.5) and Color3.new(1,1,1) or Color3.new(0,0,0)
+        p.BorderSizePixel = 0
+        p.BackgroundTransparency = 0.2
+        p.ZIndex = 15
+        p.Parent = bgContainer
+
+        TS:Create(p, TweenInfo.new(1 + math.random(), Enum.EasingStyle.Quad), {
+            Position = UDim2.new(math.random(),0,math.random(),0),
+            BackgroundTransparency = 1
+        }):Play()
+        game.Debris:AddItem(p, 1.2)
+    end
+
+    -- Rotate background
+    local rotateSpeed = 5
+    local rotateConnection
+    rotateConnection = RunService.RenderStepped:Connect(function(dt)
+        bgContainer.Rotation = bgContainer.Rotation + rotateSpeed * dt
+        for i,g in ipairs(glows) do
+            g.TextTransparency = 0.3 + 0.2*math.sin(tick()*2 + i)
+        end
+        if math.random() < 0.05 then spawnParticle() end
+    end)
+
+    -- Fade in sequence
+    TS:Create(bg, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
+    task.wait(0.25)
+    for i,r in ipairs(ribbons) do
+        TS:Create(r, TweenInfo.new(1.0 + (i-1)*0.2, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(2.55,0,1.3,0),
+            Rotation = r.Rotation - 10
+        }):Play()
+        task.wait(0.1)
+    end
+    task.wait(0.6)
+    TS:Create(beam, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {Size = UDim2.new(0.83,0,0.13,0)}):Play()
+    TS:Create(flash, TweenInfo.new(0.12), {BackgroundTransparency = 0.2}):Play()
+    task.wait(0.08)
+    TS:Create(flash, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+    TS:Create(logo, TweenInfo.new(1.0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+    for _,g in ipairs(glows) do
+        TS:Create(g, TweenInfo.new(1.0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0.2}):Play()
+    end
+    TS:Create(logo, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.fromScale(1.05,1.05), Rotation = 2}):Play()
+    task.wait(0.05)
+    TS:Create(logo, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.fromScale(1,1), Rotation = 0}):Play()
+    task.wait(1.2)
+
+    -- EXTENDED DISPLAY TIME - Added 2 seconds
+    task.wait(2.0)
+
+    -- Smooth fade-out
+    rotateConnection:Disconnect()
+    local fadeTween = TweenInfo.new(1.0, Enum.EasingStyle.Quad)
+    local fadeProps = {BackgroundTransparency = 1, Rotation = bgContainer.Rotation + 20}
+    TS:Create(bgContainer, fadeTween, fadeProps):Play()
+    TS:Create(bg, fadeTween, {BackgroundTransparency = 1}):Play()
+    TS:Create(beam, fadeTween, {BackgroundTransparency = 1}):Play()
+    TS:Create(flash, fadeTween, {BackgroundTransparency = 1}):Play()
+    for _,r in ipairs(ribbons) do
+        TS:Create(r, fadeTween, {BackgroundTransparency = 1}):Play()
+    end
+    TS:Create(logo, fadeTween, {TextTransparency = 1}):Play()
+    for _,g in ipairs(glows) do
+        TS:Create(g, fadeTween, {TextTransparency = 1}):Play()
+    end
+
+    task.wait(1.2)
+    gui:Destroy()
+    
+    if callback then
+        callback()
+    end
+end
+
+-- Simple notification function
+local function showNotification(title, message, duration)
+    duration = duration or GuiSettings.NotificationDuration
+    local notifGui = Instance.new("ScreenGui")
+    notifGui.Parent = player.PlayerGui
+    notifGui.Name = "TempNotification"
+    notifGui.DisplayOrder = 9
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 80)
+    frame.Position = UDim2.new(0.5, -150, 0.1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    frame.BorderSizePixel = 0
+    frame.Parent = notifGui
+    frame.AnchorPoint = Vector2.new(0.5, 0)
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = frame
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 30)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 16
+    titleLabel.Parent = frame
+    
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(1, 0, 1, -30)
+    messageLabel.Position = UDim2.new(0, 0, 0, 30)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.Text = message
+    messageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    messageLabel.Font = Enum.Font.Gotham
+    messageLabel.TextSize = 14
+    messageLabel.Parent = frame
+    
+    task.delay(duration, function()
+        notifGui:Destroy()
+    end)
+end
+
+local function onCharacterAdded(character)
+    task.wait(1)
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        playerSpawnPosition = hrp.Position
+        if not checkpointPosition then
+            checkpointPosition = playerSpawnPosition
+        end
+    end
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- DESYNC FUNCTION - SIMPLIFIED
+local function DESYNC()
+    if DesyncEnabled then
+        if lib then
+            lib:Notification("DESYNC", "❌ DESYNC already active!", 3)
+        else
+            showNotification("DESYNC", "❌ DESYNC already active!", 3)
+        end
+        return
+    end
+    
+    DesyncEnabled = true
+    
+    if lib then
+        lib:Notification("DESYNC", "🚀 ACTIVATING DESYNC...", 3)
+    else
+        showNotification("DESYNC", "🚀 ACTIVATING DESYNC...", 3)
+    end
+    
+    -- Load the external desync script
+    local success, error = pcall(function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/NQfDD12u"))()
+    end)
+    
+    if success then
+        if lib then
+            lib:Notification("DESYNC", "✅ DESYNC ACTIVATED!\nExternal script loaded successfully", 5)
+        else
+            showNotification("DESYNC", "✅ DESYNC ACTIVATED!\nExternal script loaded successfully", 5)
+        end
+    else
+        if lib then
+            lib:Notification("DESYNC", "❌ Failed to load DESYNC script: " .. tostring(error), 5)
+        else
+            showNotification("DESYNC", "❌ Failed to load DESYNC script: " .. tostring(error), 5)
+        end
+        DesyncEnabled = false
+    end
+end
+
+-- DELIVERY STEAL FUNCTIONS
+local function autoDropPlayer()
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local hrp = character.HumanoidRootPart
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    
+    if not humanoid or humanoid.Health <= 0 then return end
+    
+    local bodyVelocity = hrp:FindFirstChild("DeliveryGlideVelocity")
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+    end
+    
+    humanoid.PlatformStand = false
+    
+    showNotification("DELIVERY STEAL", "🪂 Auto-drop activated", 1)
+end
+
+local function glideToPosition(targetPosition)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return false end
+    
+    local hrp = character.HumanoidRootPart
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    
+    if not humanoid or humanoid.Health <= 0 then return false end
+    
+    local direction = (targetPosition - hrp.Position)
+    local distance = direction.Magnitude
+    
+    if distance < 10 then
+        autoDropPlayer()
+        return true
+    end
+    
+    local glideSpeed = 25
+    direction = direction.Unit * glideSpeed
+    
+    local glideConnection
+    glideConnection = RunService.Heartbeat:Connect(function()
+        if not DeliveryStealEnabled or not character or not hrp then
+            if glideConnection then
+                glideConnection:Disconnect()
+            end
+            return
+        end
+        
+        local currentDistance = (targetPosition - hrp.Position).Magnitude
+        if currentDistance < 10 then
+            if glideConnection then
+                glideConnection:Disconnect()
+            end
+            hrp.CFrame = CFrame.new(targetPosition)
+            autoDropPlayer()
+            return
+        end
+        
+        local newDirection = (targetPosition - hrp.Position).Unit * glideSpeed
+        local glideVelocity = hrp:FindFirstChild("DeliveryGlideVelocity") or Instance.new("BodyVelocity")
+        glideVelocity.Name = "DeliveryGlideVelocity"
+        glideVelocity.Velocity = newDirection
+        glideVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+        glideVelocity.P = 1000
+        glideVelocity.Parent = hrp
+    end)
+    
+    return true
+end
+
+local function returnToCheckpoint()
+    local targetPosition = checkpointPosition or playerSpawnPosition
+    if not targetPosition then return false end
+    
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return false end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then return false end
+    
+    return glideToPosition(targetPosition)
+end
+
+local function toggleDeliverySteal(value)
+    DeliveryStealEnabled = value
+    
+    if deliveryConnection then
+        deliveryConnection:Disconnect()
+        deliveryConnection = nil
+    end
+    
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        if hrp:FindFirstChild("DeliveryGlideVelocity") then
+            hrp.DeliveryGlideVelocity:Destroy()
+        end
+    end
+    
+    if not DeliveryStealEnabled then
+        if lib then
+            lib:Notification("DELIVERY STEAL", "❌ Delivery Steal disabled", 2)
+        else
+            showNotification("DELIVERY STEAL", "❌ Delivery Steal disabled", 2)
+        end
+        return
+    end
+    
+    if lib then
+        lib:Notification("DELIVERY STEAL", "✅ Delivery Steal enabled", 2)
+    else
+        showNotification("DELIVERY STEAL", "✅ Delivery Steal enabled", 2)
+    end
+    
+    returnToCheckpoint()
+    
+    deliveryConnection = RunService.Heartbeat:Connect(function()
+        if not DeliveryStealEnabled then
+            if deliveryConnection then
+                deliveryConnection:Disconnect()
+                deliveryConnection = nil
+            end
+            return
+        end
+        
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+        
+        local hrp = character.HumanoidRootPart
+        local targetPosition = checkpointPosition or playerSpawnPosition
+        if not targetPosition then return end
+        
+        local distanceToTarget = (hrp.Position - targetPosition).Magnitude
+        
+        if distanceToTarget > 30 then
+            returnToCheckpoint()
+        end
+    end)
+end
+
+-- XZX BOOSTS FUNCTIONS
+local function applyBoosts()
+    local character = player.Character
+    if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    if XZXBoosts.Enabled then
+        if XZXBoosts.CurrentValues.Gravity > 0 then
+            local gravityMult = 1 - (XZXBoosts.CurrentValues.Gravity / 100)
+            workspace.Gravity = math.clamp(XZXBoosts.OriginalValues.Gravity * gravityMult, 1, XZXBoosts.OriginalValues.Gravity)
+        else
+            workspace.Gravity = XZXBoosts.OriginalValues.Gravity
+        end
+
+        if XZXBoosts.CurrentValues.Speed > 0 then
+            local speedMult = 1 + (XZXBoosts.CurrentValues.Speed / 10)
+            humanoid.WalkSpeed = XZXBoosts.OriginalValues.WalkSpeed * speedMult
+        else
+            humanoid.WalkSpeed = XZXBoosts.OriginalValues.WalkSpeed
+        end
+
+        if XZXBoosts.CurrentValues.Jump > 0 then
+            local jumpMult = 1 + (XZXBoosts.CurrentValues.Jump / 10)
+            humanoid.JumpPower = XZXBoosts.OriginalValues.JumpPower * jumpMult
+        else
+            humanoid.JumpPower = XZXBoosts.OriginalValues.JumpPower
+        end
+    else
+        workspace.Gravity = XZXBoosts.OriginalValues.Gravity
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = XZXBoosts.OriginalValues.WalkSpeed
+            humanoid.JumpPower = XZXBoosts.OriginalValues.JumpPower
+        end
+    end
+end
+
+player.CharacterAdded:Connect(function()
+    task.wait(1)
+    if XZXBoosts.Enabled then
+        applyBoosts()
+    end
+end)
+
+-- FLY FUNCTIONS
+local function toggleFly(value)
+    FlyEnabled = value
+    
+    local character = player.Character
+    if not character then
+        if lib then
+            lib:Notification("Fly", "❌ No character found", 2)
+        else
+            showNotification("Fly", "❌ No character found", 2)
+        end
+        return
+    end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        if lib then
+            lib:Notification("Fly", "❌ No humanoid found", 2)
+        else
+            showNotification("Fly", "❌ No humanoid found", 2)
+        end
+        return
+    end
+    
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    
+    if bodyGyro then
+        bodyGyro:Destroy()
+        bodyGyro = nil
+    end
+    
+    if not FlyEnabled then
+        humanoid.PlatformStand = false
+        if lib then
+            lib:Notification("Fly", "❌ Fly disabled", 2)
+        else
+            showNotification("Fly", "❌ Fly disabled", 2)
+        end
+        return
+    end
+    
+    -- Enable flying
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        if lib then
+            lib:Notification("Fly", "❌ No HumanoidRootPart found", 2)
+        else
+            showNotification("Fly", "❌ No HumanoidRootPart found", 2)
+        end
+        return
+    end
+    
+    humanoid.PlatformStand = true
+    
+    -- Create BodyVelocity for movement
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+    bodyVelocity.P = 1250
+    bodyVelocity.Parent = hrp
+    
+    -- Create BodyGyro for stability
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+    bodyGyro.P = 1250
+    bodyGyro.D = 250
+    bodyGyro.Parent = hrp
+    
+    -- Flying controls
+    flyConnection = RunService.Heartbeat:Connect(function()
+        if not FlyEnabled or not character or not hrp then
+            return
+        end
+        
+        -- Update gyro to face camera direction
+        local cam = workspace.CurrentCamera
+        bodyGyro.CFrame = cam.CFrame
+        
+        -- Movement direction
+        local direction = Vector3.new(0, 0, 0)
+        
+        -- Forward/Backward (W/S)
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            direction = direction + cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            direction = direction - cam.CFrame.LookVector
+        end
+        
+        -- Left/Right (A/D)
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            direction = direction - cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            direction = direction + cam.CFrame.RightVector
+        end
+        
+        -- Up/Down (Space/LeftShift)
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            direction = direction + Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            direction = direction + Vector3.new(0, -1, 0)
+        end
+        
+        -- Normalize and apply speed
+        if direction.Magnitude > 0 then
+            direction = direction.Unit * flySpeed
+        end
+        
+        bodyVelocity.Velocity = direction
+    end)
+    
+    if lib then
+        lib:Notification("Fly", "✅ Fly enabled!\nWASD: Move\nSpace: Up\nShift: Down", 5)
+    else
+        showNotification("Fly", "✅ Fly enabled!\nWASD: Move\nSpace: Up\nShift: Down", 5)
+    end
+end
+
+-- GOD MODE FUNCTIONS
+local function toggleGodMode(value)
+    GodModeEnabled = value
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if GodModeEnabled then
+                humanoid.Name = "GodHumanoid"
+                if lib then
+                    lib:Notification("God Mode", "✅ God Mode enabled", 2)
+                else
+                    showNotification("God Mode", "✅ God Mode enabled", 2)
+                end
+            else
+                humanoid.Name = "Humanoid"
+                if lib then
+                    lib:Notification("God Mode", "❌ God Mode disabled", 2)
+                else
+                    showNotification("God Mode", "❌ God Mode disabled", 2)
+                end
+            end
+        end
+    end
+end
+
+-- CHARACTER FUNCTIONS
+local function resetCharacter()
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Health = 0
+        end
+    end
+    if lib then
+        lib:Notification("Character", "🔄 Character reset", 2)
+    else
+        showNotification("Character", "🔄 Character reset", 2)
+    end
+end
+
+local function teleportToSpawn()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = CFrame.new(0, 25, 0)
+        if lib then
+            lib:Notification("Character", "⚡ Teleported to spawn", 2)
+        else
+            showNotification("Character", "⚡ Teleported to spawn", 2)
+        end
+    end
+end
+
+-- ESP FUNCTIONS
+local function createESPBox(otherPlayer)
+    local character = otherPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "ESPBox"
+    box.Adornee = character.HumanoidRootPart
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Size = Vector3.new(4, 6, 1)
+    box.Color3 = otherPlayer == player and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+    box.Transparency = 0.5
+    box.Parent = espFolder
+
+    local nameTag = Instance.new("BillboardGui")
+    nameTag.Adornee = character.HumanoidRootPart
+    nameTag.Size = UDim2.new(0, 100, 0, 40)
+    nameTag.AlwaysOnTop = true
+    nameTag.Parent = espFolder
+    nameTag.Name = "ESPNameTag"
+
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextColor3 = otherPlayer == player and Color3.new(0, 1, 0) or Color3.new(1, 1, 1)
+    label.TextStrokeTransparency = 0.5
+    label.Text = otherPlayer.DisplayName
+    label.Parent = nameTag
+end
+
+local function updateESP()
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local humanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    local hasESP = false
+                    for _, child in pairs(espFolder:GetChildren()) do
+                        if child:IsA("BoxHandleAdornment") and child.Adornee == otherPlayer.Character.HumanoidRootPart then
+                            hasESP = true
+                            break
+                        end
+                    end
+                    if not hasESP then
+                        createESPBox(otherPlayer)
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function toggleESP(value)
+    ESPEnabled = value
+    if not ESPEnabled then
+        for _, child in pairs(espFolder:GetChildren()) do
+            child:Destroy()
+        end
+        if lib then
+            lib:Notification("ESP", "❌ ESP disabled", 2)
+        else
+            showNotification("ESP", "❌ ESP disabled", 2)
+        end
+    else
+        updateESP()
+        if lib then
+            lib:Notification("ESP", "✅ ESP enabled", 2)
+        else
+            showNotification("ESP", "✅ ESP enabled", 2)
+        end
+    end
+end
+
+-- BRAINROT FINDER ESP SYSTEM
+local function createBrainrotESP(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    
+    local character = targetPlayer.Character
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+    
+    -- Remove existing ESP if any
+    if brainrotESPObjects[targetPlayer] then
+        for _, obj in pairs(brainrotESPObjects[targetPlayer]) do
+            if obj then
+                obj:Destroy()
+            end
+        end
+    end
+    
+    brainrotESPObjects[targetPlayer] = {}
+    
+    -- Green Outline Box
+    local outlineBox = Instance.new("BoxHandleAdornment")
+    outlineBox.Name = "BrainrotESPBox"
+    outlineBox.Adornee = humanoidRootPart
+    outlineBox.AlwaysOnTop = true
+    outlineBox.ZIndex = 5
+    outlineBox.Size = Vector3.new(4, 7, 1)
+    outlineBox.Color3 = Color3.new(0, 1, 0) -- Green color
+    outlineBox.Transparency = 0.3
+    outlineBox.Parent = CoreGui
+    table.insert(brainrotESPObjects[targetPlayer], outlineBox)
+    
+    -- Green Name Tag
+    local nameTag = Instance.new("BillboardGui")
+    nameTag.Name = "BrainrotNameTag"
+    nameTag.Adornee = humanoidRootPart
+    nameTag.Size = UDim2.new(0, 200, 0, 50)
+    nameTag.AlwaysOnTop = true
+    nameTag.MaxDistance = 500
+    nameTag.Parent = CoreGui
+    
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = "🎯 " .. targetPlayer.Name .. " 🎯"
+    nameLabel.TextColor3 = Color3.new(0, 1, 0)
+    nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+    nameLabel.TextStrokeTransparency = 0
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextSize = 14
+    nameLabel.Parent = nameTag
+    table.insert(brainrotESPObjects[targetPlayer], nameTag)
+    
+    -- Create green line parts
+    local function createLinePart()
+        local part = Instance.new("Part")
+        part.Anchored = true
+        part.CanCollide = false
+        part.Material = Enum.Material.Neon
+        part.BrickColor = BrickColor.new("Lime green")
+        part.Size = Vector3.new(0.2, 0.2, 1)
+        part.Parent = workspace
+        part.Name = "BrainrotLine"
+        return part
+    end
+    
+    -- Create multiple line segments for smooth line
+    local lineSegments = {}
+    for i = 1, 20 do -- Create 20 segments for smooth line
+        local segment = createLinePart()
+        table.insert(lineSegments, segment)
+        table.insert(brainrotESPObjects[targetPlayer], segment)
+    end
+    
+    -- Distance Label
+    local distanceTag = Instance.new("BillboardGui")
+    distanceTag.Name = "BrainrotDistanceTag"
+    distanceTag.Adornee = humanoidRootPart
+    distanceTag.Size = UDim2.new(0, 150, 0, 30)
+    distanceTag.AlwaysOnTop = true
+    distanceTag.MaxDistance = 300
+    distanceTag.Parent = CoreGui
+    
+    local distanceLabel = Instance.new("TextLabel")
+    distanceLabel.Size = UDim2.new(1, 0, 1, 0)
+    distanceLabel.BackgroundTransparency = 1
+    distanceLabel.Text = "Distance: "
+    distanceLabel.TextColor3 = Color3.new(0, 1, 0)
+    distanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+    distanceLabel.TextStrokeTransparency = 0
+    distanceLabel.Font = Enum.Font.Gotham
+    distanceLabel.TextSize = 12
+    distanceLabel.Parent = distanceTag
+    table.insert(brainrotESPObjects[targetPlayer], distanceTag)
+    
+    -- Update line and distance in real-time
+    local lineConnection
+    lineConnection = RunService.Heartbeat:Connect(function()
+        if not BrainrotESPEnabled or not targetPlayer or not targetPlayer.Character or not humanoidRootPart then
+            if lineConnection then
+                lineConnection:Disconnect()
+            end
+            return
+        end
+        
+        local playerCharacter = player.Character
+        local playerRoot = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
+        
+        if playerRoot then
+            -- Update distance
+            local distance = (humanoidRootPart.Position - playerRoot.Position).Magnitude
+            distanceLabel.Text = "Distance: " .. math.floor(distance) .. " studs"
+            
+            -- Update green line
+            local startPos = playerRoot.Position
+            local endPos = humanoidRootPart.Position
+            local direction = (endPos - startPos)
+            local lineLength = direction.Magnitude
+            local segmentLength = lineLength / #lineSegments
+            
+            for i, segment in ipairs(lineSegments) do
+                if segment and segment.Parent then
+                    local segmentStart = startPos + direction.Unit * (segmentLength * (i - 1))
+                    local segmentEnd = startPos + direction.Unit * (segmentLength * i)
+                    local segmentCenter = (segmentStart + segmentEnd) / 2
+                    local segmentDirection = (segmentEnd - segmentStart)
+                    
+                    segment.CFrame = CFrame.lookAt(segmentCenter, segmentEnd)
+                    segment.Size = Vector3.new(0.3, 0.3, segmentDirection.Magnitude)
+                    
+                    -- Add glowing effect
+                    local pulse = math.sin(tick() * 8 + i * 0.5) * 0.3 + 0.7
+                    segment.Transparency = 1 - pulse
+                end
+            end
+        end
+    end)
+    
+    table.insert(brainrotESPObjects[targetPlayer], lineConnection)
+end
+
+local function removeBrainrotESP(targetPlayer)
+    if brainrotESPObjects[targetPlayer] then
+        for _, obj in pairs(brainrotESPObjects[targetPlayer]) do
+            if obj then
+                obj:Destroy()
+            end
+        end
+        brainrotESPObjects[targetPlayer] = nil
+    end
+end
+
+local function toggleBrainrotESP(value)
+    BrainrotESPEnabled = value
+    
+    if not BrainrotESPEnabled then
+        -- Clear all brainrot ESP
+        for targetPlayer, objects in pairs(brainrotESPObjects) do
+            for _, obj in pairs(objects) do
+                if obj then
+                    obj:Destroy()
+                end
+            end
+        end
+        brainrotESPObjects = {}
+        
+        -- Disconnect connections
+        for _, connection in pairs(brainrotESPConnections) do
+            if connection then
+                connection:Disconnect()
+            end
+        end
+        brainrotESPConnections = {}
+        
+        if lib then
+            lib:Notification("Brainrot ESP", "❌ Brainrot ESP disabled", 2)
+        else
+            showNotification("Brainrot ESP", "❌ Brainrot ESP disabled", 2)
+        end
+        return
+    end
+    
+    -- Enable brainrot ESP
+    if lib then
+        lib:Notification("Brainrot ESP", "✅ Brainrot ESP enabled\nGreen line connects you to brainrots", 3)
+    else
+        showNotification("Brainrot ESP", "✅ Brainrot ESP enabled\nGreen line connects you to brainrots", 3)
+    end
+    
+    -- Check for brainrots in current server
+    local foundBrainrots = {}
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            for brainrotName, _ in pairs(BrainrotFinderConfig.brainrots_to_find) do
+                if string.find(otherPlayer.Name:lower(), brainrotName:lower()) or 
+                   string.find(otherPlayer.DisplayName:lower(), brainrotName:lower()) then
+                    foundBrainrots[otherPlayer] = brainrotName
+                    break
+                end
+            end
+        end
+    end
+    
+    -- Create ESP for found brainrots
+    for targetPlayer, brainrotName in pairs(foundBrainrots) do
+        createBrainrotESP(targetPlayer)
+        if lib then
+            lib:Notification("BRAINROT FOUND", "🎯 " .. brainrotName .. " detected!\nGreen line active to target", 5)
+        else
+            showNotification("BRAINROT FOUND", "🎯 " .. brainrotName .. " detected!\nGreen line active to target", 5)
+        end
+    end
+    
+    -- Monitor for new brainrots joining
+    local playerAddedConnection = Players.PlayerAdded:Connect(function(newPlayer)
+        task.wait(2) -- Wait for player to load
+        
+        for brainrotName, _ in pairs(BrainrotFinderConfig.brainrots_to_find) do
+            if string.find(newPlayer.Name:lower(), brainrotName:lower()) or 
+               string.find(newPlayer.DisplayName:lower(), brainrotName:lower()) then
+                
+                createBrainrotESP(newPlayer)
+                if lib then
+                    lib:Notification("BRAINROT JOINED", "🎯 " .. brainrotName .. " joined the server!\nGreen line active to target", 5)
+                else
+                    showNotification("BRAINROT JOINED", "🎯 " .. brainrotName .. " joined the server!\nGreen line active to target", 5)
+                end
+                break
+            end
+        end
+    end)
+    
+    table.insert(brainrotESPConnections, playerAddedConnection)
+    
+    -- Monitor for brainrots leaving
+    local playerRemovingConnection = Players.PlayerRemoving:Connect(function(leavingPlayer)
+        if brainrotESPObjects[leavingPlayer] then
+            removeBrainrotESP(leavingPlayer)
+        end
+    end)
+    
+    table.insert(brainrotESPConnections, playerRemovingConnection)
+    
+    -- Monitor for character changes
+    local characterAddedConnection
+    characterAddedConnection = RunService.Heartbeat:Connect(function()
+        for targetPlayer, _ in pairs(brainrotESPObjects) do
+            if targetPlayer and targetPlayer.Character and not targetPlayer.Character:FindFirstChild("BrainrotESPBox") then
+                -- Character changed, recreate ESP
+                removeBrainrotESP(targetPlayer)
+                createBrainrotESP(targetPlayer)
+            end
+        end
+    end)
+    
+    table.insert(brainrotESPConnections, characterAddedConnection)
+end
+
+-- MINI MAP FUNCTIONS
+local function createMiniMap()
+    if miniMapGui then
+        miniMapGui:Destroy()
+        miniMapGui = nil
+    end
+
+    miniMapGui = Instance.new("ScreenGui")
+    miniMapGui.Name = "XZXMiniMapGui"
+    miniMapGui.Parent = player:WaitForChild("PlayerGui")
+    miniMapGui.ResetOnSpawn = false
+    miniMapGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    miniMapGui.Enabled = true
+    miniMapGui.DisplayOrder = 5
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MiniMapFrame"
+    mainFrame.Size = UDim2.new(0, 200, 0, 220)
+    mainFrame.Position = UDim2.new(1, -210, 0, 10)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    mainFrame.BackgroundTransparency = 0.1
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = miniMapGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -10, 0, 25)
+    title.Position = UDim2.new(0, 0, 0, 5)
+    title.BackgroundTransparency = 1
+    title.Text = "MINI MAP"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 14
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = mainFrame
+
+    local minimapFrame = Instance.new("Frame")
+    minimapFrame.Name = "MapBox"
+    minimapFrame.Size = UDim2.new(0, 180, 0, 180)
+    minimapFrame.Position = UDim2.new(0.5, -90, 0, 30)
+    minimapFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    minimapFrame.BorderSizePixel = 0
+    minimapFrame.ClipsDescendants = true
+    minimapFrame.Parent = mainFrame
+
+    local dotsFolder = Instance.new("Folder")
+    dotsFolder.Name = "Dots"
+    dotsFolder.Parent = minimapFrame
+
+    local mapMin = Vector2.new(-500, -500)
+    local mapMax = Vector2.new(500, 500)
+    local mapSize = Vector2.new(mapMax.X - mapMin.X, mapMax.Y - mapMin.Y)
+
+    local function createDot(color, isPlayer)
+        local dot = Instance.new("Frame")
+        dot.Size = UDim2.new(0, isPlayer and 8 or 6, 0, isPlayer and 8 or 6)
+        dot.AnchorPoint = Vector2.new(0.5, 0.5)
+        dot.BackgroundColor3 = color
+        dot.BorderSizePixel = 0
+        dot.ZIndex = 2
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = dot
+        dot.Parent = dotsFolder
+        return dot
+    end
+
+    playerDots = {}
+
+    local function addPlayer(plr)
+        local color = (plr == player) and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+        playerDots[plr] = createDot(color, plr == player)
+    end
+
+    local function removePlayer(plr)
+        if playerDots[plr] then
+            playerDots[plr]:Destroy()
+            playerDots[plr] = nil
+        end
+    end
+
+    Players.PlayerAdded:Connect(addPlayer)
+    Players.PlayerRemoving:Connect(removePlayer)
+    for _, plr in ipairs(Players:GetPlayers()) do addPlayer(plr) end
+
+    if miniMapConnection then miniMapConnection:Disconnect() end
+
+    miniMapConnection = RunService.Heartbeat:Connect(function()
+        if not MiniMapEnabled or not minimapFrame then return end
+
+        for plr, dot in pairs(playerDots) do
+            local char = plr.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local pos = root.Position
+                local relX = (pos.X - mapMin.X) / mapSize.X
+                local relZ = (pos.Z - mapMin.Y) / mapSize.Y
+                local x = math.clamp(relX * minimapFrame.AbsoluteSize.X, 5, minimapFrame.AbsoluteSize.X - 5)
+                local y = math.clamp((1 - relZ) * minimapFrame.AbsoluteSize.Y, 5, minimapFrame.AbsoluteSize.Y - 5)
+                dot.Position = UDim2.new(0, x, 0, y)
+            end
+        end
+    end)
+
+    return miniMapGui
+end
+
+local function toggleMiniMap()
+    MiniMapEnabled = not MiniMapEnabled
+
+    if MiniMapEnabled then
+        createMiniMap()
+        if lib then
+            lib:Notification("Mini Map", "🎯 Mini Map enabled", 2)
+        else
+            showNotification("Mini Map", "🎯 Mini Map enabled", 2)
+        end
+    else
+        if miniMapGui then
+            miniMapGui:Destroy()
+            miniMapGui = nil
+        end
+        if miniMapConnection then
+            miniMapConnection:Disconnect()
+            miniMapConnection = nil
+        end
+        playerDots = {}
+        if lib then
+            lib:Notification("Mini Map", "🎯 Mini Map disabled", 2)
+        else
+            showNotification("Mini Map", "🎯 Mini Map disabled", 2)
+        end
+    end
+end
+
+-- ENHANCED GRAPHICS FUNCTIONS
+local function cleanupEnhancedGraphics()
+    -- Remove all enhanced graphics effects
+    local effectsToRemove = {
+        "RTX_Bloom", "RTX_ColorCorrection", "RTX_SunRays", "RTX_DOF", "RTX_Blur",
+        "Vibrant_Bloom", "Vibrant_ColorCorrection", "Vibrant_SunRays", "Vibrant_DOF", "Vibrant_AO"
+    }
+    
+    for _, effectName in pairs(effectsToRemove) do
+        local effect = Lighting:FindFirstChild(effectName)
+        if effect then
+            effect:Destroy()
+        end
+    end
+    
+    -- Remove outlines from parts
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj:FindFirstChild("VibrantOutline") then
+            obj.VibrantOutline:Destroy()
+        end
+    end
+    
+    -- Reset lighting to default
+    Lighting.Brightness = 1
+    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    Lighting.Ambient = Color3.fromRGB(128, 128, 128)
+    Lighting.FogStart = 0
+    Lighting.FogEnd = 0
+    Lighting.GlobalShadows = true
+end
+
+local function LOW_ENHANCED_GRAPHICS()
+    cleanupEnhancedGraphics()
+    
+    local function getOrCreate(className, name)
+        local obj = Lighting:FindFirstChild(name)
+        if not obj then
+            obj = Instance.new(className)
+            obj.Name = name
+            obj.Parent = Lighting
+        end
+        return obj
+    end
+
+    -- ✨ BLOOM (subtle light glow)
+    local bloom = getOrCreate("BloomEffect", "RTX_Bloom")
+    bloom.Intensity = 0.8      -- softer, cheaper
+    bloom.Threshold = 0.85
+    bloom.Size = 8
+    bloom.Enabled = true
+
+    -- 🎞️ COLOR CORRECTION (gentle warm tone)
+    local cc = getOrCreate("ColorCorrectionEffect", "RTX_ColorCorrection")
+    cc.Contrast = 0.03
+    cc.Saturation = 0.05
+    cc.Brightness = 0.01
+    cc.TintColor = Color3.fromRGB(255, 240, 230)
+    cc.Enabled = true
+
+    -- ☀️ SUN RAYS (very light for cheap performance)
+    local sun = getOrCreate("SunRaysEffect", "RTX_SunRays")
+    sun.Intensity = 0.08
+    sun.Spread = 0.3
+    sun.Enabled = true
+
+    -- 💨 DEPTH OF FIELD (disabled for performance)
+    local dof = getOrCreate("DepthOfFieldEffect", "RTX_DOF")
+    dof.Enabled = false
+
+    -- 🌫️ LIGHTING tweaks
+    Lighting.GlobalShadows = true
+    Lighting.Brightness = 1.8
+    Lighting.OutdoorAmbient = Color3.fromRGB(60, 55, 50)
+    Lighting.Ambient = Color3.fromRGB(110, 100, 90)
+    Lighting.ClockTime = 15
+
+    pcall(function()
+        Lighting.EnvironmentSpecularScale = 1
+        Lighting.EnvironmentDiffuseScale = 0.9
+        Lighting.ShadowSoftness = 0.35
+    end)
+
+    GraphicsSettings.EnhancedGraphics = "Low"
+    saveAllSettings()
+    showNotification("Enhanced Graphics", "✅ LOW ENHANCED GRAPHICS Enabled", 3)
+end
+
+local function MEDIUM_ENHANCED_GRAPHICS()
+    cleanupEnhancedGraphics()
+    
+    local function getOrCreate(className, name)
+        local obj = Lighting:FindFirstChild(name)
+        if not obj then
+            obj = Instance.new(className)
+            obj.Name = name
+            obj.Parent = Lighting
+        end
+        return obj
+    end
+
+    -- ✨ BLOOM (medium glow)
+    local bloom = getOrCreate("BloomEffect", "RTX_Bloom")
+    bloom.Intensity = 1.8
+    bloom.Threshold = 0.85
+    bloom.Size = 14
+    bloom.Enabled = true
+
+    -- 🎞️ COLOR CORRECTION (natural warm tone)
+    local cc = getOrCreate("ColorCorrectionEffect", "RTX_ColorCorrection")
+    cc.Contrast = 0.04
+    cc.Saturation = 0.07
+    cc.Brightness = 0.015
+    cc.TintColor = Color3.fromRGB(255, 235, 220)
+    cc.Enabled = true
+
+    -- ☀️ SUN RAYS (balanced)
+    local sun = getOrCreate("SunRaysEffect", "RTX_SunRays")
+    sun.Intensity = 0.22
+    sun.Spread = 0.33
+    sun.Enabled = true
+
+    -- 🔳 DEPTH OF FIELD (light cinematic blur)
+    local dof = getOrCreate("DepthOfFieldEffect", "RTX_DOF")
+    dof.FocusDistance = 45
+    dof.InFocusRadius = 10
+    dof.FarIntensity = 0.4
+    dof.Enabled = true
+
+    -- 💨 LIGHTING setup
+    Lighting.GlobalShadows = true
+    Lighting.Brightness = 2
+    Lighting.OutdoorAmbient = Color3.fromRGB(45, 40, 35)
+    Lighting.Ambient = Color3.fromRGB(100, 90, 80)
+    Lighting.ClockTime = 15
+
+    -- 🌫️ Optional mild blur (disabled by default)
+    local blur = getOrCreate("BlurEffect", "RTX_Blur")
+    blur.Size = 0
+    blur.Enabled = false
+
+    -- ⚙️ Reflection & shadow tuning
+    pcall(function()
+        Lighting.EnvironmentSpecularScale = 1.4
+        Lighting.EnvironmentDiffuseScale = 1
+        Lighting.ShadowSoftness = 0.3
+    end)
+
+    GraphicsSettings.EnhancedGraphics = "Medium"
+    saveAllSettings()
+    showNotification("Enhanced Graphics", "✅ MEDIUM ENHANCED GRAPHICS Enabled", 3)
+end
+
+local function HIGH_ENHANCED_GRAPHICS()
+    cleanupEnhancedGraphics()
+    
+    -- Show warning message
+    showNotification("ENHANCED GRAPHICS", "⚠️STILL IN DEVELOPMENT MAY EXPERIENCE BUGS⚠️", 5)
+    
+    local function getOrCreate(className, name, parent)
+        parent = parent or Lighting
+        local obj = parent:FindFirstChild(name)
+        if not obj then
+            obj = Instance.new(className)
+            obj.Name = name
+            obj.Parent = parent
+        end
+        return obj
+    end
+
+    local function blendColor(c1, c2, alpha)
+        return Color3.new(
+            c1.R * (1 - alpha) + c2.R * alpha,
+            c1.G * (1 - alpha) + c2.G * alpha,
+            c1.B * (1 - alpha) + c2.B * alpha
+        )
+    end
+
+    local function addOutline(part, color)
+        if not part:FindFirstChild("VibrantOutline") then
+            local outline = Instance.new("SelectionBox")
+            outline.Name = "VibrantOutline"
+            outline.Adornee = part
+            outline.Color3 = color
+            outline.LineThickness = 0.03
+            outline.Parent = part
+        else
+            part.VibrantOutline.Color3 = color
+        end
+    end
+
+    -- ==============================
+    -- POST-PROCESS & CINEMATIC SETUP
+    -- ==============================
+    local bloom = getOrCreate("BloomEffect", "Vibrant_Bloom", Lighting)
+    bloom.Intensity = 1.5
+    bloom.Threshold = 0.7
+    bloom.Size = 16
+    bloom.Enabled = true
+
+    local cc = getOrCreate("ColorCorrectionEffect", "Vibrant_CC", Lighting)
+    cc.Brightness = 0.05
+    cc.Contrast = 0.08
+    cc.Saturation = 0.2
+    cc.TintColor = Color3.fromRGB(255, 240, 230)
+    cc.Enabled = true
+
+    local sun = getOrCreate("SunRaysEffect", "Vibrant_SunRays", Lighting)
+    sun.Intensity = 0.15
+    sun.Spread = 0.4
+    sun.Enabled = true
+
+    local dof = getOrCreate("DepthOfFieldEffect", "Vibrant_DOF", Lighting)
+    dof.FocusDistance = 40
+    dof.InFocusRadius = 12
+    dof.FarIntensity = 0.25
+    dof.Enabled = true
+
+    local ao = getOrCreate("AmbientOcclusionEffect", "Vibrant_AO", Lighting)
+    ao.Intensity = 0.35
+    ao.Radius = 10
+    ao.Enabled = true
+
+    Lighting.GlobalShadows = true
+    Lighting.Brightness = 1.8
+    Lighting.ClockTime = 14.5
+    Lighting.OutdoorAmbient = Color3.fromRGB(80, 75, 70)
+    Lighting.Ambient = Color3.fromRGB(140, 130, 120)
+    Lighting.FogColor = Color3.fromRGB(220, 215, 210)
+    Lighting.FogStart = 100
+    Lighting.FogEnd = 1000
+
+    pcall(function()
+        Lighting.EnvironmentSpecularScale = 1.3
+        Lighting.EnvironmentDiffuseScale = 1.1
+        Lighting.ShadowSoftness = 0.35
+    end)
+
+    -- ==============================
+    -- NEON LIGHT COLOR PICKUP
+    -- ==============================
+    local function sampleNearbyNeonColor(position)
+        local neonColor = Color3.fromRGB(255, 255, 255) -- default neutral
+        local nearestDist = 20
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
+                local dist = (obj.Position - position).Magnitude
+                if dist < nearestDist then
+                    neonColor = obj.Color
+                    nearestDist = dist
+                end
+            end
+        end
+        return neonColor
+    end
+
+    local function updatePlayerColors(dt)
+        local character = player.Character
+        if not character or not character.Parent then return end
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local targetColor = sampleNearbyNeonColor(part.Position)
+                part.Color = blendColor(part.Color, targetColor, dt * 3)
+                addOutline(part, targetColor)
+            end
+        end
+    end
+
+    local function updateWorldNeon()
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and (obj.Material == Enum.Material.Metal or obj.Material == Enum.Material.Glass) then
+                local targetColor = sampleNearbyNeonColor(obj.Position)
+                obj.Color = blendColor(obj.Color, targetColor, 0.05 * 3)
+                addOutline(obj, targetColor)
+            end
+        end
+    end
+
+    -- ==============================
+    -- MAIN LOOP
+    -- ==============================
+    local connection
+    connection = RunService.RenderStepped:Connect(function(dt)
+        updatePlayerColors(dt)
+        updateWorldNeon()
+    end)
+
+    GraphicsSettings.EnhancedGraphics = "High"
+    
+    -- Store connection for cleanup
+    GraphicsSettings.HighGraphicsConnection = connection
+    saveAllSettings()
+end
+
+-- EXTREME ENHANCED GRAPHICS FUNCTION
+local function EXTREME_ENHANCED_GRAPHICS()
+    if lib then
+        lib:Notification("EXTREME GRAPHICS", "🟣 Loading XZX Hybrid Weather + Sky System...", 3)
+    else
+        showNotification("EXTREME GRAPHICS", "🟣 Loading XZX Hybrid Weather + Sky System...", 3)
+    end
+    
+    -- Load the XZX HYBRID WEATHER + SKY SYSTEM
+    local success, error = pcall(function()
+        --[[
+            XZX HYBRID WEATHER + SKY SYSTEM
+            --------------------------------
+            Features:
+            - AAA Sun/Moon system
+            - OG + AAA clouds (non-overlapping)
+            - Rain/Snow + puddles/snow buildup
+            - Lightning + thunder
+            - Fog + HDR + Bloom + DOF + SunRays
+            - Day/Night cycle
+        ]]
+
+        local RunService = game:GetService("RunService")
+        local Lighting = game:GetService("Lighting")
+        local Players = game:GetService("Players")
+        local Debris = game:GetService("Debris")
+        local TweenService = game:GetService("TweenService")
+        local Player = Players.LocalPlayer
+        local Cam = workspace.CurrentCamera
+
+        ----------------------------------------------------------
+        -- CONFIG
+        ----------------------------------------------------------
+        local config = {
+            -- Sun/Moon
+            SunDistance = 1200,
+            SunVisualSize = 140,
+            SunMidColor = Color3.fromRGB(255,240,200),
+            SunHorizonColor = Color3.fromRGB(255,140,90),
+            MoonColor = Color3.fromRGB(190,210,255),
+            SunBrightnessDay = 2.0,
+            SunBrightnessNight = 0.0,
+
+            -- Day/Night
+            DayLengthSeconds = 49,
+            NightLengthSeconds = 40,
+
+            -- Clouds
+            NumCloudsAAA = 20,
+            NumCloudsOG = 40,
+            CloudYAAA = 320,
+            CloudYOG = 160,
+            CloudBorder = 800,
+            CloudMinSize = 80,
+            CloudMaxSize = 150,
+            CloudSpeedAAA = {0.01,0.03},
+            CloudSpeedOG = {0.04,0.06},
+            MIN_CLOUD_DISTANCE = 100,
+
+            -- Weather
+            WeatherInterval = 30,
+            WeatherDuration = 20,
+            SpawnRatePerCloud = 0.12,
+            RaindropSpeed = 160,
+            SnowflakeSpeed = 28,
+            RaindropLifetime = 6,
+            SnowflakeLifetime = 8,
+            RaindropSize = Vector3.new(0.24,1.6,0.24),
+            SnowflakeSize = Vector3.new(0.5,0.5,0.5),
+            MaxPuddles = 200,
+            MaxSnowPatches = 200,
+            PuddleBaseSize = 2.5,
+            SnowBaseSize = 1.5,
+            PuddleMaxOpacity = 0.7,
+            SnowMaxOpacity = 0.65,
+            PuddleFillRate = 0.08,
+            SnowFillRate = 0.04,
+            PuddleFadeRate = 0.01,
+            SnowMeltRate = 0.01,
+            LightningChancePerSecond = 0.08,
+            ThunderSoundId = "rbxassetid://130791237",
+        }
+
+        ----------------------------------------------------------
+        -- EXTREME GRAPHICS
+        ----------------------------------------------------------
+        Lighting.Technology = Enum.Technology.Future
+        Lighting.GlobalShadows = true
+        Lighting.ShadowSoftness = 0.15
+        Lighting.EnvironmentDiffuseScale = 1.25
+        Lighting.EnvironmentSpecularScale = 1.35
+        Lighting.Brightness = 1
+        Lighting.FogStart = 150
+        Lighting.FogEnd = 1200
+        Lighting.FogColor = Color3.fromRGB(210,215,230)
+        Lighting.OutdoorAmbient = Color3.fromRGB(120,130,150)
+        Lighting.Ambient = Color3.fromRGB(85,90,105)
+
+        local cc = Instance.new("ColorCorrectionEffect", Lighting)
+        cc.Brightness = -0.03
+        cc.Contrast = 0.14
+        cc.Saturation = 0.06
+        cc.TintColor = Color3.fromRGB(255,240,225)
+
+        local bloom = Instance.new("BloomEffect", Lighting)
+        bloom.Intensity = 0.65
+        bloom.Size = 26
+        bloom.Threshold = 1.05
+
+        local rays = Instance.new("SunRaysEffect", Lighting)
+        rays.Intensity = 0.06
+        rays.Spread = 0.38
+
+        local dof = Instance.new("DepthOfFieldEffect", Lighting)
+        dof.FocusDistance = 45
+        dof.InFocusRadius = 24
+        dof.FarIntensity = 0.14
+        dof.NearIntensity = 0.04
+
+        local ao = Instance.new("AmbientOcclusionEffect", Lighting)
+        ao.Intensity = 0.48
+        ao.Radius = 8
+
+        ----------------------------------------------------------
+        -- SUN & MOON BILLBOARDS
+        ----------------------------------------------------------
+        local function makeBillboard(name,color,size)
+            local part = Instance.new("Part")
+            part.Name = name
+            part.Anchored = true
+            part.CanCollide = false
+            part.Size = Vector3.new(1,1,1)
+            part.Transparency = 1
+            part.Parent = workspace
+
+            local bb = Instance.new("BillboardGui")
+            bb.Name = name.."_BB"
+            bb.Size = UDim2.fromOffset(size, size)
+            bb.AlwaysOnTop = true
+            bb.LightInfluence = 1
+            bb.Parent = part
+
+            local img = Instance.new("ImageLabel")
+            img.Name = name.."_IMG"
+            img.Size = UDim2.new(1,0,1,0)
+            img.BackgroundTransparency = 1
+            img.Image = "" -- blank
+            img.ImageColor3 = color
+            img.Parent = bb
+
+            return part, img
+        end
+
+        local SunPart, SunImg = makeBillboard("Sun", config.SunMidColor, config.SunVisualSize)
+        local MoonPart, MoonImg = makeBillboard("Moon", config.MoonColor, math.floor(config.SunVisualSize*0.7))
+
+        -- Directional light
+        local SunLight = Instance.new("DirectionalLight")
+        SunLight.Name = "SunLight"
+        SunLight.Parent = workspace
+        SunLight.Brightness = config.SunBrightnessDay
+        SunLight.Color = config.SunMidColor
+        SunLight.Shadows = true
+
+        ----------------------------------------------------------
+        -- CLOUDS (AAA + OG)
+        ----------------------------------------------------------
+        local CloudFolder = Instance.new("Folder", workspace)
+        CloudFolder.Name = "HybridClouds"
+        local CloudGroups = {}
+
+        local function randomMoveVector(speedRange)
+            local dir = Vector3.new(math.random()*2-1,0,math.random()*2-1).Unit
+            local speed = math.random()*(speedRange[2]-speedRange[1]) + speedRange[1]
+            return dir*speed
+        end
+
+        local function spawnCloud(posY, num, speedRange, sizeMin, sizeMax)
+            for i=1,num do
+                local sizeFactor = math.random(sizeMin,sizeMax)
+                local p = Instance.new("Part")
+                p.Size = Vector3.new(sizeFactor,48,sizeFactor)
+                p.Position = Vector3.new(math.random(-config.CloudBorder, config.CloudBorder),
+                                         posY + math.random(-8,8),
+                                         math.random(-config.CloudBorder, config.CloudBorder))
+                p.Anchored = true
+                p.CanCollide = false
+                p.Material = Enum.Material.SmoothPlastic
+                p.Color = Color3.fromRGB(255,255,255)
+                p.Transparency = 0.25
+                p.Parent = CloudFolder
+                table.insert(CloudGroups,{part=p,move=randomMoveVector(speedRange)})
+            end
+        end
+
+        spawnCloud(config.CloudYAAA, config.NumCloudsAAA, config.CloudSpeedAAA, config.CloudMinSize, config.CloudMaxSize)
+        spawnCloud(config.CloudYOG, config.NumCloudsOG, config.CloudSpeedOG, config.CloudMinSize/1.5, config.CloudMaxSize/1.5)
+
+        ----------------------------------------------------------
+        -- WEATHER SYSTEM
+        ----------------------------------------------------------
+        local WeatherState = "Clear"
+        local WeatherTimeLeft = 0
+        local Puddles = {}
+        local SnowPatches = {}
+
+        local function raycastDown(origin)
+            local params = RaycastParams.new()
+            params.FilterType = Enum.RaycastFilterType.Blacklist
+            params.IgnoreWater = false
+            return workspace:Raycast(origin, Vector3.new(0,-4000,0), params)
+        end
+
+        local function spawnOrGrowPuddle(hitPos)
+            local p = Instance.new("Part")
+            p.Size = Vector3.new(config.PuddleBaseSize,0.1,config.PuddleBaseSize)
+            p.Anchored = true
+            p.CanCollide = false
+            p.Material = Enum.Material.SmoothPlastic
+            p.Color = Color3.fromRGB(45,55,90)
+            p.Position = hitPos + Vector3.new(0,0.05,0)
+            p.Parent = workspace
+            table.insert(Puddles,p)
+            Debris:AddItem(p,30)
+        end
+
+        local function spawnOrGrowSnow(hitPos)
+            local s = Instance.new("Part")
+            s.Size = Vector3.new(config.SnowBaseSize,0.1,config.SnowBaseSize)
+            s.Anchored = true
+            s.CanCollide = false
+            s.Material = Enum.Material.SmoothPlastic
+            s.Color = Color3.fromRGB(245,245,250)
+            s.Position = hitPos + Vector3.new(0,0.05,0)
+            s.Parent = workspace
+            table.insert(SnowPatches,s)
+            Debris:AddItem(s,30)
+        end
+
+        local function spawnRaindrop(cloudPart)
+            local origin = cloudPart.Position - Vector3.new(0,8,0)
+            local hit = raycastDown(origin)
+            if hit then
+                spawnOrGrowPuddle(hit.Position)
+            end
+        end
+
+        local function spawnSnowflake(cloudPart)
+            local origin = cloudPart.Position - Vector3.new(0,8,0)
+            local hit = raycastDown(origin)
+            if hit then
+                spawnOrGrowSnow(hit.Position)
+            end
+        end
+
+        local function lightningStrike()
+            local flash = Instance.new("ColorCorrectionEffect", Lighting)
+            flash.Brightness = 0.6
+            TweenService:Create(flash,TweenInfo.new(0.25),{Brightness=-0.5}):Play()
+            Debris:AddItem(flash,0.3)
+        end
+
+        ----------------------------------------------------------
+        -- UTILITY: LERP COLOR
+        ----------------------------------------------------------
+        local function lerpColor(a,b,t)
+            return Color3.new(a.R + (b.R-a.R)*t,
+                              a.G + (b.G-a.G)*t,
+                              a.B + (b.B-a.B)*t)
+        end
+
+        ----------------------------------------------------------
+        -- MAIN LOOP
+        ----------------------------------------------------------
+        local totalCycle = config.DayLengthSeconds+config.NightLengthSeconds
+        local startTick = tick()
+        local sunPrev = SunPart.Position
+
+        RunService.Heartbeat:Connect(function(dt)
+            local now = tick()
+            local elapsed = now - startTick
+            local cyclePos = elapsed % totalCycle
+            local isDayPhase = cyclePos < config.DayLengthSeconds
+            local phaseT = isDayPhase and (cyclePos / config.DayLengthSeconds) or ((cyclePos - config.DayLengthSeconds)/config.NightLengthSeconds)
+            local fullT = (elapsed % totalCycle) / totalCycle
+
+            -- Sun/Moon Position
+            local angle = fullT*math.pi*2
+            local sunWorld = Vector3.new(math.sin(angle)*config.SunDistance, math.sin(angle*0.5)*config.SunDistance, math.cos(angle)*config.SunDistance)
+            SunPart.Position = sunPrev:Lerp(sunWorld, math.clamp(dt*2.5,0,1))
+            sunPrev = SunPart.Position
+            MoonPart.Position = -SunPart.Position
+
+            local elev = math.clamp((SunPart.Position.Y/config.SunDistance+1)/2,0,1)
+            local sunColor = lerpColor(config.SunHorizonColor, config.SunMidColor, elev)
+            SunImg.ImageColor3 = sunColor
+            MoonImg.ImageColor3 = config.MoonColor
+
+            if SunLight then
+                SunLight.Direction = - (SunPart.Position).Unit
+                SunLight.Color = sunColor
+                SunLight.Brightness = isDayPhase and (0.9+elev*1.1) or 0
+            end
+
+            Lighting.OutdoorAmbient = lerpColor(Color3.fromRGB(90,95,110),Color3.fromRGB(220,220,230),elev*0.9)
+            Lighting.Ambient = lerpColor(Color3.fromRGB(60,65,75),Color3.fromRGB(140,140,150),elev*0.9)
+
+            -- Cloud movement + collision
+            for i, cg in ipairs(CloudGroups) do
+                local speed = cg.part.Size.X>100 and Vector3.new(0.02,0,0.01) or Vector3.new(0.06,0,0.04)
+                cg.part.Position = cg.part.Position + cg.move * dt * 60
+                -- Wrap
+                local b = config.CloudBorder
+                local pos = cg.part.Position
+                if pos.X > b then pos = Vector3.new(-b,pos.Y,pos.Z) end
+                if pos.X < -b then pos = Vector3.new(b,pos.Y,pos.Z) end
+                if pos.Z > b then pos = Vector3.new(pos.X,pos.Y,-b) end
+                if pos.Z < -b then pos = Vector3.new(pos.X,pos.Y,b) end
+                cg.part.Position = pos
+
+                -- Collision prevention
+                for j,cg2 in ipairs(CloudGroups) do
+                    if i~=j then
+                        local dist = (cg.part.Position - cg2.part.Position).Magnitude
+                        local minDist = (cg.part.Size.X+cg2.part.Size.X)/2 + config.MIN_CLOUD_DISTANCE
+                        if dist < minDist then
+                            local push = (cg.part.Position - cg2.part.Position).Unit
+                            if push.Magnitude>0 then
+                                cg.part.Position = cg.part.Position + push * (minDist-dist)*0.5
+                                cg2.part.Position = cg2.part.Position - push * (minDist-dist)*0.5
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Weather
+            if WeatherState ~= "Clear" then
+                for _,cg in ipairs(CloudGroups) do
+                    if WeatherState=="Rain" then spawnRaindrop(cg.part) end
+                    if WeatherState=="Snow" then spawnSnowflake(cg.part) end
+                end
+                if WeatherState=="Rain" and math.random() < config.LightningChancePerSecond*dt then
+                    lightningStrike()
+                end
+                WeatherTimeLeft = WeatherTimeLeft - dt
+                if WeatherTimeLeft <=0 then WeatherState="Clear" end
+            else
+                if math.random() < dt/config.WeatherInterval then
+                    WeatherState = (math.random()<0.5) and "Rain" or "Snow"
+                    WeatherTimeLeft = config.WeatherDuration
+                end
+            end
+        end)
+
+        print("🌦️ XZX FULL HYBRID WEATHER SYSTEM WITH NON-OVERLAPPING CLOUDS LOADED")
+    end)
+    
+    if success then
+        GraphicsSettings.EnhancedGraphics = "Extreme"
+        saveAllSettings()
+        if lib then
+            lib:Notification("EXTREME GRAPHICS", "🟣 XZX HYBRID WEATHER + SKY SYSTEM ACTIVATED!", 5)
+        else
+            showNotification("EXTREME GRAPHICS", "🟣 XZX HYBRID WEATHER + SKY SYSTEM ACTIVATED!", 5)
+        end
+    else
+        if lib then
+            lib:Notification("EXTREME GRAPHICS", "❌ Failed to load extreme graphics: " .. tostring(error), 5)
+        else
+            showNotification("EXTREME GRAPHICS", "❌ Failed to load extreme graphics: " .. tostring(error), 5)
+        end
+    end
+end
+
+local function DISABLE_ENHANCED_GRAPHICS()
+    cleanupEnhancedGraphics()
+    
+    if GraphicsSettings.HighGraphicsConnection then
+        GraphicsSettings.HighGraphicsConnection:Disconnect()
+        GraphicsSettings.HighGraphicsConnection = nil
+    end
+    
+    GraphicsSettings.EnhancedGraphics = "None"
+    saveAllSettings()
+    showNotification("Enhanced Graphics", "❌ ENHANCED GRAPHICS Disabled", 3)
+end
+
+-- PROPER GRAPHICS APPLICATION FUNCTION
+local function applyGraphicsSettings()
+    -- Apply Roblox graphics quality level (1-10)
+    settings().Rendering.QualityLevel = GraphicsSettings.QualityLevel
+    
+    -- Apply shadows
+    Lighting.GlobalShadows = GraphicsSettings.Shadows
+    Lighting.ShadowSoftness = GraphicsSettings.Shadows and 0.5 or 0
+    
+    -- Apply frame rate limit
+    if settings().Rendering then
+        settings().Rendering.FrameRateManager = GraphicsSettings.FrameRateLimit > 0 and 1 or 0
+        if GraphicsSettings.FrameRateLimit > 0 then
+            settings().Rendering.EnableFRM = true
+            settings().Rendering.Quality.Level = GraphicsSettings.QualityLevel
+        end
+    end
+    
+    -- Apply VSync
+    if settings().Rendering then
+        settings().Rendering.VSync = GraphicsSettings.VSync
+    end
+    
+    -- Apply fullbright
+    if Lighting:FindFirstChild("XZXFullbright") then
+        Lighting.XZXFullbright:Destroy()
+    end
+    
+    if GraphicsSettings.Fullbright then
+        -- Remove shadows for true fullbright
+        Lighting.GlobalShadows = false
+        Lighting.Ambient = Color3.new(1, 1, 1)
+        Lighting.Brightness = 2
+        Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+        
+        local fullbright = Instance.new("ColorCorrectionEffect")
+        fullbright.Name = "XZXFullbright"
+        fullbright.Brightness = 0.3
+        fullbright.Contrast = 0.1
+        fullbright.Saturation = 0.1
+        fullbright.TintColor = Color3.new(1, 1, 1)
+        fullbright.Parent = Lighting
+    else
+        -- Restore default lighting
+        Lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
+        Lighting.Brightness = 1
+        Lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+    end
+    
+    -- Apply render distance to camera
+    local camera = workspace.CurrentCamera
+    if camera then
+        -- Roblox doesn't have direct render distance control, but we can adjust fog
+        if GraphicsSettings.RenderDistance < 1000 then
+            Lighting.Atmosphere.Density = 0.1
+            Lighting.FogStart = GraphicsSettings.RenderDistance * 0.8
+            Lighting.FogEnd = GraphicsSettings.RenderDistance
+        else
+            Lighting.Atmosphere.Density = 0
+            Lighting.FogStart = 0
+            Lighting.FogEnd = 0
+        end
+    end
+    
+    -- Apply particle quality
+    if GraphicsSettings.ParticleQuality == "Low" then
+        settings().Rendering.EagerBulkExecution = false
+    elseif GraphicsSettings.ParticleQuality == "Medium" then
+        settings().Rendering.EagerBulkExecution = true
+    else -- High
+        settings().Rendering.EagerBulkExecution = true
+    end
+    
+    saveAllSettings()
+    showNotification("Graphics", "✅ Graphics settings applied!", 2)
+end
+
+-- FRAME RATE COUNTER
+local fpsCounter = nil
+local function createFPSCounter()
+    local fpsGui = Instance.new("ScreenGui")
+    fpsGui.Name = "XZXFPSCounter"
+    fpsGui.Parent = player.PlayerGui
+    fpsGui.ResetOnSpawn = false
+    fpsGui.DisplayOrder = 999
+    
+    local fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Size = UDim2.new(0, 100, 0, 30)
+    fpsLabel.Position = UDim2.new(1, -110, 0, 10)
+    fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    fpsLabel.BackgroundTransparency = 0.5
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    fpsLabel.Font = Enum.Font.GothamBold
+    fpsLabel.TextSize = 14
+    fpsLabel.Text = "FPS: 60"
+    fpsLabel.Parent = fpsGui
+    
+    local frameCount = 0
+    local lastTime = tick()
+    
+    RunService.RenderStepped:Connect(function()
+        frameCount = frameCount + 1
+        local currentTime = tick()
+        if currentTime - lastTime >= 1 then
+            local fps = math.floor(frameCount / (currentTime - lastTime))
+            fpsLabel.Text = "FPS: " .. fps
+            frameCount = 0
+            lastTime = currentTime
+            
+            -- Color code based on performance
+            if fps >= 50 then
+                fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+            elseif fps >= 30 then
+                fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+            else
+                fpsLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+            end
+        end
+    end)
+    
+    return fpsGui
+end
+
+-- BRAINROT FINDER FUNCTIONS
+local function addBrainrotToFilter(brainrotName)
+    if brainrotName and brainrotName ~= "" then
+        BrainrotFinderConfig.brainrots_to_find[brainrotName] = true
+        if lib then
+            lib:Notification("BRAINROT FINDER", "Added '" .. brainrotName .. "' to filter", 3)
+        else
+            showNotification("BRAINROT FINDER", "Added '" .. brainrotName .. "' to filter", 3)
+        end
+        return true
+    else
+        if lib then
+            lib:Notification("BRAINROT FINDER", "Please enter a valid name", 3)
+        else
+            showNotification("BRAINROT FINDER", "Please enter a valid name", 3)
+        end
+        return false
+    end
+end
+
+local function toggleSecretFilter(value)
+    if value then
+        -- Disable Gods filter if it's active
+        if FilterStates.Gods then
+            FilterStates.Gods = false
+            -- Update the UI toggle if available
+            if lib and lib.GodsFilterToggle then
+                lib.GodsFilterToggle:SetValue(false)
+            end
+        end
+        
+        -- Clear current filter and add all secret brainrot names
+        BrainrotFinderConfig.brainrots_to_find = {}
+        for _, secretName in pairs(SecretBrainrotNames) do
+            BrainrotFinderConfig.brainrots_to_find[secretName] = true
+        end
+        FilterStates.Secrets = true
+        
+        if lib then
+            lib:Notification("SECRET FILTER", "SECRET FILTER ACTIVATED! Tracking " .. #SecretBrainrotNames .. " secret brainrots", 5)
+        else
+            showNotification("SECRET FILTER", "SECRET FILTER ACTIVATED! Tracking " .. #SecretBrainrotNames .. " secret brainrots", 5)
+        end
+    else
+        -- Clear the filter when turned off
+        BrainrotFinderConfig.brainrots_to_find = {}
+        FilterStates.Secrets = false
+        if lib then
+            lib:Notification("SECRET FILTER", "Secret filter disabled - Filter cleared", 3)
+        else
+            showNotification("SECRET FILTER", "Secret filter disabled - Filter cleared", 3)
+        end
+    end
+end
+
+local function toggleGodsFilter(value)
+    if value then
+        -- Disable Secrets filter if it's active
+        if FilterStates.Secrets then
+            FilterStates.Secrets = false
+            -- Update the UI toggle if available
+            if lib and lib.SecretFilterToggle then
+                lib.SecretFilterToggle:SetValue(false)
+            end
+        end
+        
+        -- Clear current filter and add all brainrot gods names
+        BrainrotFinderConfig.brainrots_to_find = {}
+        for _, godName in pairs(BrainrotGodsNames) do
+            BrainrotFinderConfig.brainrots_to_find[godName] = true
+        end
+        FilterStates.Gods = true
+        
+        if lib then
+            lib:Notification("BRAINROT GODS FILTER", "BRAINROT GODS FILTER ACTIVATED! Tracking " .. #BrainrotGodsNames .. " brainrot gods", 5)
+        else
+            showNotification("BRAINROT GODS FILTER", "BRAINROT GODS FILTER ACTIVATED! Tracking " .. #BrainrotGodsNames .. " brainrot gods", 5)
+        end
+    else
+        -- Clear the filter when turned off
+        BrainrotFinderConfig.brainrots_to_find = {}
+        FilterStates.Gods = false
+        if lib then
+            lib:Notification("BRAINROT GODS FILTER", "Brainrot Gods filter disabled - Filter cleared", 3)
+        else
+            showNotification("BRAINROT GODS FILTER", "Brainrot Gods filter disabled - Filter cleared", 3)
+        end
+    end
+end
+
+local function startBrainrotFinder()
+    if lib then
+        lib:Notification("BRAINROT FINDER", "Starting Brainrot Finder...", 3)
+    else
+        showNotification("BRAINROT FINDER", "Starting Brainrot Finder...", 3)
+    end
+    
+    -- Safe execution with error handling
+    local success, error = pcall(function()
+        -- Determine which webhook to use based on filter type
+        local webhook_url
+        
+        if FilterStates.Secrets or FilterStates.Gods then
+            -- Use the first webhook for secrets and gods filters
+            webhook_url = "https://discord.com/api/webhooks/1422364870149668884/LeqmwSNbhRyac9z7Xnv60bzXKk9G3H-x6qVPWIbNPmrnNWvC3Ak4LYI4rsfqihyUASf_"
+        else
+            -- Use the second webhook for manual filter search
+            webhook_url = "https://discord.com/api/webhooks/1434196175124303972/wZxi86RCfk2dY1UabKcymLT6gEV9TQTOumh97lfRRWAULv9_fVQIo64KbfbkfWy_WMRc"
+        end
+        
+        -- Set the global config with the appropriate webhook
+        _G.Config = {
+            webhook_url = webhook_url,
+            brainrots_to_find = BrainrotFinderConfig.brainrots_to_find,
+            hop_after_brainrot_left = BrainrotFinderConfig.hop_after_brainrot_left
+        }
+        
+        -- Load the external script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/dreams7906/BrainrotFinder/refs/heads/main/File"))()
+    end)
+    
+    if success then
+        local count = 0
+        for _ in pairs(BrainrotFinderConfig.brainrots_to_find) do
+            count = count + 1
+        end
+        
+        -- Show appropriate notification based on filter type
+        if FilterStates.Secrets then
+            if lib then
+                lib:Notification("BRAINROT FINDER", "SECRET FILTER loaded! Tracking " .. count .. " secret brainrots", 5)
+            else
+                showNotification("BRAINROT FINDER", "SECRET FILTER loaded! Tracking " .. count .. " secret brainrots", 5)
+            end
+        elseif FilterStates.Gods then
+            if lib then
+                lib:Notification("BRAINROT FINDER", "BRAINROT GODS FILTER loaded! Tracking " .. count .. " brainrot gods", 5)
+            else
+                showNotification("BRAINROT FINDER", "BRAINROT GODS FILTER loaded! Tracking " .. count .. " brainrot gods", 5)
+            end
+        else
+            if lib then
+                lib:Notification("BRAINROT FINDER", "Brainrot Finder loaded successfully! Tracking " .. count .. " brainrots", 5)
+            else
+                showNotification("BRAINROT FINDER", "Brainrot Finder loaded successfully! Tracking " .. count .. " brainrots", 5)
+            end
+        end
+    else
+        if lib then
+            lib:Notification("BRAINROT FINDER", "Failed to load Brainrot Finder: " .. tostring(error), 5)
+        else
+            showNotification("BRAINROT FINDER", "Failed to load Brainrot Finder: " .. tostring(error), 5)
+        end
+    end
+end
+
+-- BRAINROT SPAWNER Function
+local function startBrainrotSpawner()
+    -- Close XZX HUB menu when Brainrot Spawner is activated
+    if mainMenu then
+        mainMenu.Enabled = false
+    end
+    
+    if lib then
+        lib:Notification("BRAINROT SPAWNER", "🚀 Loading Brainrot Spawner...", 3)
+    else
+        showNotification("BRAINROT SPAWNER", "🚀 Loading Brainrot Spawner...", 3)
+    end
+    
+    local success, error = pcall(function()
+        loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/visual.luau"))()
+    end)
+    
+    if success then
+        if lib then
+            lib:Notification("BRAINROT SPAWNER", "✅ Brainrot Spawner loaded successfully!", 5)
+        else
+            showNotification("BRAINROT SPAWNER", "✅ Brainrot Spawner loaded successfully!", 5)
+        end
+    else
+        if lib then
+            lib:Notification("BRAINROT SPAWNER", "❌ Failed to load Brainrot Spawner", 5)
+        else
+            showNotification("BRAINROT SPAWNER", "❌ Failed to load Brainrot Spawner", 5)
+        end
+    end
+end
+
+-- JOIN JOBLD SERVER FUNCTION
+local function joinJobldServer(jobId)
+    if not jobId or jobId == "" then
+        if lib then
+            lib:Notification("JOIN JOBLD SERVER", "❌ Please enter a valid Job ID", 3)
+        else
+            showNotification("JOIN JOBLD SERVER", "❌ Please enter a valid Job ID", 3)
+        end
+        return
+    end
+    
+    if lib then
+        lib:Notification("JOIN JOBLD SERVER", "🚀 Attempting to join server: " .. jobId, 3)
+    else
+        showNotification("JOIN JOBLD SERVER", "🚀 Attempting to join server: " .. jobId, 3)
+    end
+    
+    local success, result = pcall(function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, player)
+    end)
+    
+    if not success then
+        if lib then
+            lib:Notification("JOIN JOBLD SERVER", "❌ Failed to join server: " .. tostring(result), 5)
+        else
+            showNotification("JOIN JOBLD SERVER", "❌ Failed to join server: " .. tostring(result), 5)
+        end
+    end
+end
+
+-- ===== AUTO JOIN SYSTEM =====
+function toggleAutoJoin(value)
+    _G.AutoJoinEnabled = value
+end
+
+-- PRIVATE SERVER SYSTEM
+local function generatePrivateServer()
+    if lib then
+        lib:Notification("PRIVATE SERVER", "⚠️CURRENTLY PATCHED⚠️ - Feature unavailable", 3)
+    else
+        showNotification("PRIVATE SERVER", "⚠️CURRENTLY PATCHED⚠️ - Feature unavailable", 3)
+    end
+end
+
+local function copyServerLink()
+    local currentJobId = game.JobId
+    local placeId = game.PlaceId
+    local serverLink = "https://www.roblox.com/games/" .. placeId .. "/?privateServerLinkCode=" .. currentJobId
+    
+    if setclipboard then
+        setclipboard(serverLink)
+        if lib then
+            lib:Notification("SERVER LINK", "📋 Server link copied to clipboard!", 5)
+        else
+            showNotification("SERVER LINK", "📋 Server link copied to clipboard!", 5)
+        end
+    else
+        if lib then
+            lib:Notification("SERVER LINK", "🔗 Copy this link: " .. serverLink, 10)
+        else
+            showNotification("SERVER LINK", "🔗 Copy this link: " .. serverLink, 10)
+        end
+    end
+end
+
+-- SETTINGS FULLSCREEN PAGE FUNCTION WITH XZX-STYLE BUTTONS AND ENHANCED GRAPHICS
+local function openSettingsPage()
+    local playerGui = player:WaitForChild("PlayerGui")
+
+    -- Close the main hub when settings opens
+    if mainMenu then
+        mainMenu.Enabled = false
+    end
+
+    -- Destroy if already open
+    if playerGui:FindFirstChild("XZXSettingsPage") then
+        playerGui.XZXSettingsPage:Destroy()
+    end
+
+    local settingsGui = Instance.new("ScreenGui")
+    settingsGui.Name = "XZXSettingsPage"
+    settingsGui.Parent = playerGui
+    settingsGui.ResetOnSpawn = false
+    settingsGui.IgnoreGuiInset = true
+    settingsGui.DisplayOrder = 100
+
+    -- Background
+    local bg = Instance.new("Frame")
+    bg.Size = UDim2.new(1, 0, 1, 0)
+    bg.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    bg.BackgroundTransparency = 0.15
+    bg.Parent = settingsGui
+
+    -- Fade-in effect
+    bg.BackgroundTransparency = 1
+    game:GetService("TweenService"):Create(bg, TweenInfo.new(0.3), {BackgroundTransparency = 0.15}):Play()
+
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Text = "SETTINGS"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 28
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.Position = UDim2.new(0.5, -75, 0.05, 0)
+    title.Size = UDim2.new(0, 150, 0, 40)
+    title.Parent = bg
+
+    -- Avatar (FIXED PROFILE PICTURE LOADING)
+    local avatar = Instance.new("ImageLabel")
+    avatar.Size = UDim2.new(0, 150, 0, 150)
+    avatar.Position = UDim2.new(0.1, 0, 0.2, 0)
+    avatar.BackgroundTransparency = 1
+    avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=420&height=420&format=png"
+    avatar.Parent = bg
+
+    -- Username under the avatar (lowered position)
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Text = player.Name
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextSize = 18
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Position = UDim2.new(0.1, 0, 0.52, 0)  -- Lowered position
+    nameLabel.Size = UDim2.new(0, 150, 0, 30)
+    nameLabel.Parent = bg
+
+    -- Right Panel for Settings
+    local rightPanel = Instance.new("Frame")
+    rightPanel.Size = UDim2.new(0.5, 0, 0.7, 0)
+    rightPanel.Position = UDim2.new(0.45, 0, 0.2, 0)
+    rightPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    rightPanel.BackgroundTransparency = 0.3
+    rightPanel.Parent = bg
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = rightPanel
+
+    local rightTitle = Instance.new("TextLabel")
+    rightTitle.Text = "SETTINGS"
+    rightTitle.Font = Enum.Font.GothamBold
+    rightTitle.TextSize = 20
+    rightTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    rightTitle.BackgroundTransparency = 1
+    rightTitle.Position = UDim2.new(0.05, 0, 0.02, 0)
+    rightTitle.Size = UDim2.new(0, 200, 0, 30)
+    rightTitle.Parent = rightPanel
+
+    -- Settings Container with Scrolling
+    local settingsContainer = Instance.new("ScrollingFrame")
+    settingsContainer.Size = UDim2.new(0.95, 0, 0.85, 0)
+    settingsContainer.Position = UDim2.new(0.025, 0, 0.1, 0)
+    settingsContainer.BackgroundTransparency = 1
+    settingsContainer.BorderSizePixel = 0
+    settingsContainer.ScrollBarThickness = 6
+    settingsContainer.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
+    settingsContainer.Parent = rightPanel
+
+    -- Function to create XZX-style buttons
+    local function createXZXButton(text, position, callback, isToggle, initialState)
+        local button = Instance.new("TextButton")
+        button.Text = text
+        button.Font = Enum.Font.Gotham
+        button.TextSize = 14
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+        button.BorderSizePixel = 0
+        button.Size = UDim2.new(0.9, 0, 0, 35)
+        button.Position = position
+        button.Parent = settingsContainer
+        
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 6)
+        buttonCorner.Parent = button
+        
+        local buttonStroke = Instance.new("UIStroke")
+        buttonStroke.Color = Color3.fromRGB(60, 60, 70)
+        buttonStroke.Thickness = 2
+        buttonStroke.Parent = button
+        
+        -- Hover effects
+        button.MouseEnter:Connect(function()
+            game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}):Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            if isToggle then
+                local targetColor = initialState and Color3.fromRGB(30, 80, 30) or Color3.fromRGB(30, 30, 40)
+                game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+            else
+                game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 40)}):Play()
+            end
+        end)
+        
+        button.MouseButton1Click:Connect(function()
+            if isToggle then
+                initialState = not initialState
+                if initialState then
+                    button.BackgroundColor3 = Color3.fromRGB(30, 80, 30)
+                    button.Text = text .. " [ON]"
+                else
+                    button.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+                    button.Text = text .. " [OFF]"
+                end
+            else
+                -- Pulse effect on click
+                game:GetService("TweenService"):Create(button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
+                task.wait(0.1)
+                game:GetService("TweenService"):Create(button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30, 30, 40)}):Play()
+            end
+            if callback then
+                callback(initialState)
+            end
+        end)
+        
+        if isToggle then
+            if initialState then
+                button.BackgroundColor3 = Color3.fromRGB(30, 80, 30)
+                button.Text = text .. " [ON]"
+            else
+                button.Text = text .. " [OFF]"
+            end
+        end
+        
+        return button
+    end
+
+    -- GUI Settings Section
+    local guiSection = Instance.new("TextLabel")
+    guiSection.Text = "GUI SETTINGS"
+    guiSection.Font = Enum.Font.GothamBold
+    guiSection.TextSize = 16
+    guiSection.TextColor3 = Color3.fromRGB(255, 255, 255)
+    guiSection.BackgroundTransparency = 1
+    guiSection.Size = UDim2.new(1, 0, 0, 25)
+    guiSection.Position = UDim2.new(0, 0, 0, 0)
+    guiSection.Parent = settingsContainer
+
+    -- Hide Watermark Toggle
+    createXZXButton("Hide Watermark", UDim2.new(0.05, 0, 0, 30), function(state)
+        GuiSettings.HideWatermark = state
+        if lib and lib.Watermark then
+            lib.Watermark.Visible = not state
+        end
+        saveAllSettings()
+        showNotification("Settings", state and "✅ Watermark hidden" or "❌ Watermark shown", 2)
+    end, true, GuiSettings.HideWatermark)
+
+    -- Notification Duration
+    local notifDurationLabel = Instance.new("TextLabel")
+    notifDurationLabel.Text = "Notification Duration: " .. GuiSettings.NotificationDuration .. "s"
+    notifDurationLabel.Font = Enum.Font.Gotham
+    notifDurationLabel.TextSize = 14
+    notifDurationLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notifDurationLabel.BackgroundTransparency = 1
+    notifDurationLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    notifDurationLabel.Position = UDim2.new(0.05, 0, 0, 75)
+    notifDurationLabel.Parent = settingsContainer
+
+    createXZXButton("Adjust Duration", UDim2.new(0.05, 0, 0, 105), function()
+        GuiSettings.NotificationDuration = GuiSettings.NotificationDuration + 1
+        if GuiSettings.NotificationDuration > 10 then
+            GuiSettings.NotificationDuration = 1
+        end
+        notifDurationLabel.Text = "Notification Duration: " .. GuiSettings.NotificationDuration .. "s"
+        saveAllSettings()
+        showNotification("Settings", "Notification duration: " .. GuiSettings.NotificationDuration .. "s", 2)
+    end, false)
+
+    -- Auto Save Toggle
+    createXZXButton("Auto-Save Settings", UDim2.new(0.05, 0, 0, 150), function(state)
+        GuiSettings.AutoSaveSettings = state
+        saveAllSettings()
+        showNotification("Settings", state and "✅ Auto-save enabled" or "❌ Auto-save disabled", 2)
+    end, true, GuiSettings.AutoSaveSettings)
+
+    -- Welcome Message Toggle
+    createXZXButton("Welcome Message", UDim2.new(0.05, 0, 0, 195), function(state)
+        GuiSettings.ShowWelcomeMessage = state
+        saveAllSettings()
+        showNotification("Settings", state and "✅ Welcome message enabled" or "❌ Welcome message disabled", 2)
+    end, true, GuiSettings.ShowWelcomeMessage)
+
+    -- Theme Color Selection
+    local themeLabel = Instance.new("TextLabel")
+    themeLabel.Text = "Theme Color: Blue"
+    themeLabel.Font = Enum.Font.Gotham
+    themeLabel.TextSize = 14
+    themeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    themeLabel.BackgroundTransparency = 1
+    themeLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    themeLabel.Position = UDim2.new(0.05, 0, 0, 240)
+    themeLabel.Parent = settingsContainer
+
+    -- Update theme label based on current color
+    local colorNames = {"Blue", "Green", "Red", "Purple", "Orange", "Pink", "Cyan"}
+    local currentColorName = "Blue"
+    for i, color in ipairs({
+        Color3.fromRGB(0, 170, 255),   -- Blue
+        Color3.fromRGB(0, 255, 0),     -- Green
+        Color3.fromRGB(255, 0, 0),     -- Red
+        Color3.fromRGB(170, 0, 255),   -- Purple
+        Color3.fromRGB(255, 170, 0),   -- Orange
+        Color3.fromRGB(255, 0, 255),   -- Pink
+        Color3.fromRGB(0, 255, 255)    -- Cyan
+    }) do
+        if color == GuiSettings.ThemeColor then
+            currentColorName = colorNames[i]
+            break
+        end
+    end
+    themeLabel.Text = "Theme Color: " .. currentColorName
+
+    createXZXButton("Change Theme", UDim2.new(0.05, 0, 0, 270), function()
+        local colors = {
+            Color3.fromRGB(0, 170, 255),   -- Blue
+            Color3.fromRGB(0, 255, 0),     -- Green
+            Color3.fromRGB(255, 0, 0),     -- Red
+            Color3.fromRGB(170, 0, 255),   -- Purple
+            Color3.fromRGB(255, 170, 0),   -- Orange
+            Color3.fromRGB(255, 0, 255),   -- Pink
+            Color3.fromRGB(0, 255, 255)    -- Cyan
+        }
+        local colorNames = {"Blue", "Green", "Red", "Purple", "Orange", "Pink", "Cyan"}
+        
+        local currentIndex = 1
+        for i, color in ipairs(colors) do
+            if color == GuiSettings.ThemeColor then
+                currentIndex = i
+                break
+            end
+        end
+        
+        local nextIndex = (currentIndex % #colors) + 1
+        GuiSettings.ThemeColor = colors[nextIndex]
+        themeLabel.Text = "Theme Color: " .. colorNames[nextIndex]
+        saveAllSettings()
+        showNotification("Theme", "Theme color set to: " .. colorNames[nextIndex], 2)
+        
+        -- Apply theme to main menu if it exists
+        if lib and mainMenu then
+            -- Note: This would require the UI library to support runtime theme changes
+            -- You might need to reload the menu for theme changes to take effect
+            showNotification("Theme", "Restart menu to see theme changes", 3)
+        end
+    end, false)
+
+    -- GAME GRAPHICS SETTINGS SECTION
+    local gameGraphicsSection = Instance.new("TextLabel")
+    gameGraphicsSection.Text = "GAME GRAPHICS"
+    gameGraphicsSection.Font = Enum.Font.GothamBold
+    gameGraphicsSection.TextSize = 16
+    gameGraphicsSection.TextColor3 = Color3.fromRGB(255, 255, 255)
+    gameGraphicsSection.BackgroundTransparency = 1
+    gameGraphicsSection.Size = UDim2.new(1, 0, 0, 25)
+    gameGraphicsSection.Position = UDim2.new(0, 0, 0, 315)
+    gameGraphicsSection.Parent = settingsContainer
+
+    -- Enhanced Graphics Status
+    local enhancedGraphicsLabel = Instance.new("TextLabel")
+    enhancedGraphicsLabel.Text = "Enhanced Graphics: " .. GraphicsSettings.EnhancedGraphics
+    enhancedGraphicsLabel.Font = Enum.Font.Gotham
+    enhancedGraphicsLabel.TextSize = 14
+    enhancedGraphicsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    enhancedGraphicsLabel.BackgroundTransparency = 1
+    enhancedGraphicsLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    enhancedGraphicsLabel.Position = UDim2.new(0.05, 0, 0, 345)
+    enhancedGraphicsLabel.Parent = settingsContainer
+
+    -- Enhanced Graphics Buttons (only one can be active at a time)
+    createXZXButton("🟢 LOW ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 375), function()
+        -- Disable any currently active enhanced graphics first
+        if GraphicsSettings.EnhancedGraphics ~= "None" then
+            DISABLE_ENHANCED_GRAPHICS()
+        end
+        LOW_ENHANCED_GRAPHICS()
+        enhancedGraphicsLabel.Text = "Enhanced Graphics: Low"
+        showNotification("Enhanced Graphics", "🟢 LOW ENHANCED GRAPHICS Enabled", 3)
+    end, false)
+
+    createXZXButton("🟡 MEDIUM ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 420), function()
+        -- Disable any currently active enhanced graphics first
+        if GraphicsSettings.EnhancedGraphics ~= "None" then
+            DISABLE_ENHANCED_GRAPHICS()
+        end
+        MEDIUM_ENHANCED_GRAPHICS()
+        enhancedGraphicsLabel.Text = "Enhanced Graphics: Medium"
+        showNotification("Enhanced Graphics", "🟡 MEDIUM ENHANCED GRAPHICS Enabled", 3)
+    end, false)
+
+    createXZXButton("🔴 HIGH ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 465), function()
+        -- Disable any currently active enhanced graphics first
+        if GraphicsSettings.EnhancedGraphics ~= "None" then
+            DISABLE_ENHANCED_GRAPHICS()
+        end
+        HIGH_ENHANCED_GRAPHICS()
+        enhancedGraphicsLabel.Text = "Enhanced Graphics: High"
+        showNotification("Enhanced Graphics", "🔴 HIGH ENHANCED GRAPHICS Enabled", 3)
+    end, false)
+
+    -- EXTREME ENHANCED GRAPHICS Button (Updated to purple)
+    createXZXButton("🟣 EXTREME ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 510), function()
+        -- Disable any currently active enhanced graphics first
+        if GraphicsSettings.EnhancedGraphics ~= "None" then
+            DISABLE_ENHANCED_GRAPHICS()
+        end
+        EXTREME_ENHANCED_GRAPHICS()
+        enhancedGraphicsLabel.Text = "Enhanced Graphics: Extreme"
+    end, false)
+
+    createXZXButton("❌ DISABLE ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 555), function()
+        DISABLE_ENHANCED_GRAPHICS()
+        enhancedGraphicsLabel.Text = "Enhanced Graphics: None"
+        showNotification("Enhanced Graphics", "❌ ENHANCED GRAPHICS Disabled", 3)
+    end, false)
+
+    -- GRAPHICS SETTINGS SECTION (PROPER IMPLEMENTATION)
+    local graphicsSection = Instance.new("TextLabel")
+    graphicsSection.Text = "GRAPHICS SETTINGS"
+    graphicsSection.Font = Enum.Font.GothamBold
+    graphicsSection.TextSize = 16
+    graphicsSection.TextColor3 = Color3.fromRGB(255, 255, 255)
+    graphicsSection.BackgroundTransparency = 1
+    graphicsSection.Size = UDim2.new(1, 0, 0, 25)
+    graphicsSection.Position = UDim2.new(0, 0, 0, 600)
+    graphicsSection.Parent = settingsContainer
+
+    -- Graphics Quality Level (1-10)
+    local qualityLabel = Instance.new("TextLabel")
+    qualityLabel.Text = "Graphics Quality: " .. GraphicsSettings.QualityLevel .. "/10"
+    qualityLabel.Font = Enum.Font.Gotham
+    qualityLabel.TextSize = 14
+    qualityLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    qualityLabel.BackgroundTransparency = 1
+    qualityLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    qualityLabel.Position = UDim2.new(0.05, 0, 0, 630)
+    qualityLabel.Parent = settingsContainer
+
+    createXZXButton("Decrease Quality", UDim2.new(0.05, 0, 0, 660), function()
+        GraphicsSettings.QualityLevel = math.max(1, GraphicsSettings.QualityLevel - 1)
+        qualityLabel.Text = "Graphics Quality: " .. GraphicsSettings.QualityLevel .. "/10"
+        applyGraphicsSettings()
+    end, false)
+
+    createXZXButton("Increase Quality", UDim2.new(0.05, 0, 0, 705), function()
+        GraphicsSettings.QualityLevel = math.min(10, GraphicsSettings.QualityLevel + 1)
+        qualityLabel.Text = "Graphics Quality: " .. GraphicsSettings.QualityLevel .. "/10"
+        applyGraphicsSettings()
+    end, false)
+
+    -- Shadows Toggle
+    createXZXButton("Shadows", UDim2.new(0.05, 0, 0, 750), function(state)
+        GraphicsSettings.Shadows = state
+        applyGraphicsSettings()
+        showNotification("Graphics", state and "✅ Shadows enabled" or "❌ Shadows disabled", 2)
+    end, true, GraphicsSettings.Shadows)
+
+    -- Anti-Aliasing Toggle
+    createXZXButton("Anti-Aliasing", UDim2.new(0.05, 0, 0, 795), function(state)
+        GraphicsSettings.AntiAliasing = state
+        applyGraphicsSettings()
+        showNotification("Graphics", state and "✅ Anti-Aliasing enabled" or "❌ Anti-Aliasing disabled", 2)
+    end, true, GraphicsSettings.AntiAliasing)
+
+    -- Fullbright Toggle
+    createXZXButton("Fullbright", UDim2.new(0.05, 0, 0, 840), function(state)
+        GraphicsSettings.Fullbright = state
+        applyGraphicsSettings()
+        showNotification("Graphics", state and "✅ Fullbright enabled" or "❌ Fullbright disabled", 2)
+    end, true, GraphicsSettings.Fullbright)
+
+    -- Frame Rate Limit
+    local fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Text = "Frame Rate Limit: " .. (GraphicsSettings.FrameRateLimit == 0 and "Unlimited" or GraphicsSettings.FrameRateLimit .. " FPS")
+    fpsLabel.Font = Enum.Font.Gotham
+    fpsLabel.TextSize = 14
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    fpsLabel.Position = UDim2.new(0.05, 0, 0, 885)
+    fpsLabel.Parent = settingsContainer
+
+    createXZXButton("Adjust FPS Limit", UDim2.new(0.05, 0, 0, 915), function()
+        local fpsOptions = {0, 30, 60, 120, 144, 240}
+        local currentIndex = 1
+        for i, fps in ipairs(fpsOptions) do
+            if fps == GraphicsSettings.FrameRateLimit then
+                currentIndex = i
+                break
+            end
+        end
+        
+        local nextIndex = (currentIndex % #fpsOptions) + 1
+        GraphicsSettings.FrameRateLimit = fpsOptions[nextIndex]
+        fpsLabel.Text = "Frame Rate Limit: " .. (GraphicsSettings.FrameRateLimit == 0 and "Unlimited" or GraphicsSettings.FrameRateLimit .. " FPS")
+        applyGraphicsSettings()
+        showNotification("Graphics", "FPS Limit: " .. (GraphicsSettings.FrameRateLimit == 0 and "Unlimited" or GraphicsSettings.FrameRateLimit .. " FPS"), 2)
+    end, false)
+
+    -- VSync Toggle
+    createXZXButton("VSync", UDim2.new(0.05, 0, 0, 960), function(state)
+        GraphicsSettings.VSync = state
+        applyGraphicsSettings()
+        showNotification("Graphics", state and "✅ VSync enabled" or "❌ VSync disabled", 2)
+    end, true, GraphicsSettings.VSync)
+
+    -- Render Distance
+    local renderLabel = Instance.new("TextLabel")
+    renderLabel.Text = "Render Distance: " .. GraphicsSettings.RenderDistance
+    renderLabel.Font = Enum.Font.Gotham
+    renderLabel.TextSize = 14
+    renderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    renderLabel.BackgroundTransparency = 1
+    renderLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    renderLabel.Position = UDim2.new(0.05, 0, 0, 1005)
+    renderLabel.Parent = settingsContainer
+
+    createXZXButton("Decrease Render Distance", UDim2.new(0.05, 0, 0, 1035), function()
+        GraphicsSettings.RenderDistance = math.max(100, GraphicsSettings.RenderDistance - 100)
+        renderLabel.Text = "Render Distance: " .. GraphicsSettings.RenderDistance
+        applyGraphicsSettings()
+        showNotification("Graphics", "Render Distance: " .. GraphicsSettings.RenderDistance, 2)
+    end, false)
+
+    createXZXButton("Increase Render Distance", UDim2.new(0.05, 0, 0, 1080), function()
+        GraphicsSettings.RenderDistance = math.min(2000, GraphicsSettings.RenderDistance + 100)
+        renderLabel.Text = "Render Distance: " .. GraphicsSettings.RenderDistance
+        applyGraphicsSettings()
+        showNotification("Graphics", "Render Distance: " .. GraphicsSettings.RenderDistance, 2)
+    end, false)
+
+    -- Particle Quality
+    local particleLabel = Instance.new("TextLabel")
+    particleLabel.Text = "Particle Quality: " .. GraphicsSettings.ParticleQuality
+    particleLabel.Font = Enum.Font.Gotham
+    particleLabel.TextSize = 14
+    particleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    particleLabel.BackgroundTransparency = 1
+    particleLabel.Size = UDim2.new(0.9, 0, 0, 25)
+    particleLabel.Position = UDim2.new(0.05, 0, 0, 1125)
+    particleLabel.Parent = settingsContainer
+
+    createXZXButton("Change Particle Quality", UDim2.new(0.05, 0, 0, 1155), function()
+        local qualities = {"Low", "Medium", "High"}
+        local currentIndex = 1
+        for i, quality in ipairs(qualities) do
+            if quality == GraphicsSettings.ParticleQuality then
+                currentIndex = i
+                break
+            end
+        end
+        
+        local nextIndex = (currentIndex % #qualities) + 1
+        GraphicsSettings.ParticleQuality = qualities[nextIndex]
+        particleLabel.Text = "Particle Quality: " .. GraphicsSettings.ParticleQuality
+        applyGraphicsSettings()
+        showNotification("Graphics", "Particle Quality: " .. GraphicsSettings.ParticleQuality, 2)
+    end, false)
+
+    -- FPS Counter Toggle
+    createXZXButton("Show FPS Counter", UDim2.new(0.05, 0, 0, 1200), function(state)
+        if state then
+            if not fpsCounter then
+                fpsCounter = createFPSCounter()
+            end
+            fpsCounter.Enabled = true
+            showNotification("Graphics", "✅ FPS Counter enabled", 2)
+        else
+            if fpsCounter then
+                fpsCounter.Enabled = false
+            end
+            showNotification("Graphics", "❌ FPS Counter disabled", 2)
+        end
+    end, true, false)
+
+    -- Performance Presets
+    createXZXButton("🎯 PERFORMANCE MODE (Low)", UDim2.new(0.05, 0, 0, 1245), function()
+        GraphicsSettings.QualityLevel = 1
+        GraphicsSettings.Shadows = false
+        GraphicsSettings.AntiAliasing = false
+        GraphicsSettings.FrameRateLimit = 60
+        GraphicsSettings.RenderDistance = 300
+        GraphicsSettings.ParticleQuality = "Low"
+        
+        -- Update labels
+        qualityLabel.Text = "Graphics Quality: 1/10"
+        fpsLabel.Text = "Frame Rate Limit: 60 FPS"
+        renderLabel.Text = "Render Distance: 300"
+        particleLabel.Text = "Particle Quality: Low"
+        
+        applyGraphicsSettings()
+        showNotification("Graphics", "🎯 PERFORMANCE MODE ACTIVATED!", 3)
+    end, false)
+
+    createXZXButton("🌟 QUALITY MODE (High)", UDim2.new(0.05, 0, 0, 1290), function()
+        GraphicsSettings.QualityLevel = 8
+        GraphicsSettings.Shadows = true
+        GraphicsSettings.AntiAliasing = true
+        GraphicsSettings.FrameRateLimit = 0
+        GraphicsSettings.RenderDistance = 1500
+        GraphicsSettings.ParticleQuality = "High"
+        
+        -- Update labels
+        qualityLabel.Text = "Graphics Quality: 8/10"
+        fpsLabel.Text = "Frame Rate Limit: Unlimited"
+        renderLabel.Text = "Render Distance: 1500"
+        particleLabel.Text = "Particle Quality: High"
+        
+        applyGraphicsSettings()
+        showNotification("Graphics", "🌟 QUALITY MODE ACTIVATED!", 3)
+    end, false)
+
+    -- System Settings Section
+    local systemSection = Instance.new("TextLabel")
+    systemSection.Text = "SYSTEM SETTINGS"
+    systemSection.Font = Enum.Font.GothamBold
+    systemSection.TextSize = 16
+    systemSection.TextColor3 = Color3.fromRGB(255, 255, 255)
+    systemSection.BackgroundTransparency = 1
+    systemSection.Size = UDim2.new(1, 0, 0, 25)
+    systemSection.Position = UDim2.new(0, 0, 0, 1335)
+    systemSection.Parent = settingsContainer
+
+    -- Export Settings Button
+    createXZXButton("Export Settings", UDim2.new(0.05, 0, 0, 1365), function()
+        if setclipboard then
+            local settingsString = "XZX HUB Settings:\n"
+            settingsString = settingsString .. "Theme: " .. tostring(GuiSettings.ThemeColor) .. "\n"
+            settingsString = settingsString .. "Hide Watermark: " .. tostring(GuiSettings.HideWatermark) .. "\n"
+            settingsString = settingsString .. "Notification Duration: " .. GuiSettings.NotificationDuration .. "s\n"
+            settingsString = settingsString .. "Auto Save: " .. tostring(GuiSettings.AutoSaveSettings) .. "\n"
+            settingsString = settingsString .. "Welcome Message: " .. tostring(GuiSettings.ShowWelcomeMessage)
+            setclipboard(settingsString)
+            showNotification("Settings", "✅ Settings copied to clipboard!", 3)
+        else
+            showNotification("Settings", "❌ Clipboard not available", 3)
+        end
+    end, false)
+
+    -- Reset Settings Button
+    createXZXButton("Reset All Settings", UDim2.new(0.05, 0, 0, 1410), function()
+        GuiSettings = {
+            ThemeColor = Color3.fromRGB(0, 170, 255),
+            BackgroundTransparency = 0.1,
+            TextColor = Color3.fromRGB(255, 255, 255),
+            AccentColor = Color3.fromRGB(0, 255, 0),
+            MenuPosition = UDim2.new(0.5, -175, 0.5, -200),
+            MenuSize = UDim2.new(0, 350, 0, 400),
+            HideWatermark = false,
+            NotificationDuration = 3,
+            AutoSaveSettings = false,
+            ShowWelcomeMessage = true
+        }
+        
+        GraphicsSettings = {
+            QualityLevel = 3,
+            Shadows = true,
+            AntiAliasing = true,
+            TextureQuality = "Medium",
+            RenderDistance = 500,
+            Fullbright = false,
+            FrameRateLimit = 60,
+            VSync = false,
+            MeshPartDetail = "Medium",
+            ParticleQuality = "Medium",
+            EnhancedGraphics = "None"
+        }
+        
+        -- Cleanup enhanced graphics
+        DISABLE_ENHANCED_GRAPHICS()
+        
+        -- Refresh the settings page
+        settingsGui:Destroy()
+        openSettingsPage()
+        
+        showNotification("Settings", "🔄 All settings reset to default!", 3)
+    end, false)
+
+    -- Reload Menu Button
+    createXZXButton("Reload Menu", UDim2.new(0.05, 0, 0, 1455), function()
+        showNotification("Settings", "🔄 Reloading menu...", 2)
+        task.wait(1)
+        settingsGui:Destroy()
+        if mainMenu then
+            mainMenu.Enabled = false
+        end
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/OPEN-SOURCE-UI-ROBLOX/refs/heads/main/X2ZU%20UI%20ROBLOX%20OPEN%20SOURCE/Lib"))()
+    end, false)
+
+    -- Update container size for new content
+    settingsContainer.CanvasSize = UDim2.new(0, 0, 0, 1550)
+
+    -- XZX-style Close Button (Moved to bottom right)
+    local closeButton = Instance.new("TextButton")
+    closeButton.Text = "CLOSE"
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextSize = 16
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.BorderSizePixel = 0
+    closeButton.Size = UDim2.new(0, 120, 0, 40)
+    closeButton.Position = UDim2.new(1, -140, 1, -60)  -- Bottom right position
+    closeButton.Parent = bg
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.Parent = closeButton
+    
+    local closeStroke = Instance.new("UIStroke")
+    closeStroke.Color = Color3.fromRGB(150, 30, 30)
+    closeStroke.Thickness = 2
+    closeStroke.Parent = closeButton
+    
+    -- Close button hover effects
+    closeButton.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(220, 70, 70)}):Play()
+    end)
+    
+    closeButton.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        -- Pulse effect on click
+        game:GetService("TweenService"):Create(closeButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(240, 90, 90)}):Play()
+        task.wait(0.1)
+        
+        -- Fade out animation
+        local tween = game:GetService("TweenService"):Create(bg, TweenInfo.new(0.3), {BackgroundTransparency = 1})
+        tween:Play()
+        tween.Completed:Wait()
+
+        settingsGui:Destroy()
+        -- Reopen XZX HUB menu when settings closes
+        if mainMenu then
+            mainMenu.Enabled = true
+        end
+    end)
+end
+
+-- MENU MANAGEMENT SYSTEM
+local function cleanupExistingMenus()
+    pcall(function()
+        local playerGui = player:FindFirstChild("PlayerGui")
+        if playerGui then
+            for _, gui in pairs(playerGui:GetChildren()) do
+                if gui:IsA("ScreenGui") and (gui.Name:find("XZX") or gui.Name:find("Main") or gui.Name:find("Library")) then
+                    gui:Destroy()
+                end
+            end
+        end
+    end)
+end
+
+local function isMenuAlreadyLoaded()
+    if mainMenu and mainMenu.Enabled then
+        return true
+    end
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if playerGui then
+        for _, gui in pairs(playerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and (gui.Name:find("Main") or gui.Name:find("Library")) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Load UI Library and Create Main Menu (WITH DUPLICATE PROTECTION)
+local function loadMainMenu()
+    if menuLoadInProgress then
+        showNotification("Menu", "Menu is already loading...", 2)
+        return
+    end
+    
+    menuLoadAttempts = menuLoadAttempts + 1
+    if menuLoadAttempts > MAX_MENU_ATTEMPTS then
+        showNotification("Menu Error", "Too many menu load attempts. Restart game.", 5)
+        return
+    end
+    
+    if isMenuAlreadyLoaded() then
+        showNotification("Menu", "Menu is already open!", 2)
+        return
+    end
+    
+    menuLoadInProgress = true
+    cleanupExistingMenus()
+    
+    local success, loadedLib = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/OPEN-SOURCE-UI-ROBLOX/refs/heads/main/X2ZU%20UI%20ROBLOX%20OPEN%20SOURCE/Lib"))()
+    end)
+    
+    if not success or not loadedLib then
+        showNotification("Error", "Failed to load UI library", 5)
+        menuLoadInProgress = false
+        return
+    end
+
+    lib = loadedLib
+
+    local main = lib:Load({
+        Title = "Steal a Brainrot 〢 XZX HUB",
+        ToggleButton = "rbxassetid://105059922903197",
+        BindGui = Enum.KeyCode.RightControl,
+    })
+
+    if main and main.Instance then
+        main.Instance.DisplayOrder = 10
+    end
+
+    mainMenu = main
+
+    local tabs = {
+        Home = main:AddTab("Home"),
+        General = main:AddTab("General"),
+        Boosts = main:AddTab("XZX BOOSTS"),
+        Visual = main:AddTab("Visual"),
+        Character = main:AddTab("Character"),
+        Brainrot = main:AddTab("BRAINROT SPAWNER ⚠️NOT OWNED⚠️"),
+        PrivateServer = main:AddTab("PRIVATE SERVER ⚠️PATCHED⚠️"),
+        BrainrotFinder = main:AddTab("BRAINROT FINDER"),
+        Settings = main:AddTab("Settings")
+    }
+
+    local Sections = {
+        Welcome = tabs.Home:AddSection({Defualt = true, Locked = true}),
+        Discord = tabs.Home:AddSection({Defualt = true, Locked = true}),
+        DeliverySteal = tabs.General:AddSection({Title = "DELIVERY STEAL System", Description = "Checkpoint-based teleportation", Defualt = false, Locked = false}),
+        XZXPlatform = tabs.General:AddSection({Title = "XZX PLATFORM (STANDARD)", Description = "Personal floating platform with controls", Defualt = false, Locked = false}),
+        BoostMain = tabs.Boosts:AddSection({Title = "XZX BOOSTS", Description = "Enhanced character boosts", Defualt = false, Locked = false}),
+        BoostSettings = tabs.Boosts:AddSection({Title = "XZX BOOST SETTINGS", Description = "Customize your boosts", Defualt = false, Locked = false}),
+        VisualMain = tabs.Visual:AddSection({Title = "Visual Features", Description = "ESP, Mini Map, and visual enhancements", Defualt = false, Locked = false}),
+        Character = tabs.Character:AddSection({Title = "Character Controls", Description = "Character manipulation and movement", Defualt = false, Locked = false}),
+        Desync = tabs.Character:AddSection({Title = "DESYNC SYSTEM", Description = "Activate external desync script", Defualt = false, Locked = false}),
+        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY XZX HUB⚠️", Defualt = false, Locked = false}),
+        PrivateServerMain = tabs.PrivateServer:AddSection({Title = "PRIVATE SERVER ⚠️PATCHED⚠️", Description = "Private server system currently patched", Defualt = false, Locked = false}),
+        BrainrotFinderMain = tabs.BrainrotFinder:AddSection({Title = "BRAINROT FINDER", Description = "Find and track specific brainrot players", Defualt = false, Locked = false}),
+        SettingsMain = tabs.Settings:AddSection({Title = "SETTINGS", Description = "Open full settings panel", Defualt = false, Locked = false})
+    }
+
+    -- HOME TAB CONTENT
+    Sections.Discord:AddButton({
+        Title = "Copy Discord Invite",
+        Callback = function()
+            if setclipboard then
+                setclipboard("https://discord.gg/HVmFyZVgNK") -- UPDATED DISCORD LINK
+                lib:Notification("Discord", "Copied invite to clipboard!", 5)
+            else
+                lib:Notification("Discord", "Join: https://discord.gg/HVmFyZVgNK", 5) -- UPDATED DISCORD LINK
+            end
+        end,
+    })
+
+    Sections.Welcome:AddParagraph({
+        Title = "Welcome to XZX HUB!",
+        Description = "👋 Welcome to XZX Hub!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
+    })
+
+    -- DELIVERY STEAL Section
+    Sections.DeliverySteal:AddToggle("DeliveryStealToggle", {
+        Title = "DELIVERY STEAL",
+        Description = "Auto-return to checkpoint",
+        Default = false,
+        Callback = function(value)
+            toggleDeliverySteal(value)
+        end
+    })
+
+    Sections.DeliverySteal:AddButton({
+        Title = "SET CHECKPOINT",
+        Description = "Set current position as checkpoint",
+        Callback = function()
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                checkpointPosition = character.HumanoidRootPart.Position
+                lib:Notification("DELIVERY STEAL", "✅ Checkpoint set!", 2)
+            else
+                lib:Notification("DELIVERY STEAL", "❌ No character found", 2)
+            end
+        end
+    })
+
+    Sections.DeliverySteal:AddButton({
+        Title = "RESET TO SPAWN",
+        Description = "Reset checkpoint to spawn position",
+        Callback = function()
+            if playerSpawnPosition then
+                checkpointPosition = playerSpawnPosition
+                lib:Notification("DELIVERY STEAL", "✅ Checkpoint reset to spawn", 2)
+            else
+                lib:Notification("DELIVERY STEAL", "❌ No spawn position recorded", 2)
+            end
+        end
+    })
+
+    -- XZX PLATFORM Section (ADDED TO GENERAL)
+    Sections.XZXPlatform:AddToggle("XZXPlatformToggle", {
+        Title = "XZX PLATFORM (STANDARD)",
+        Description = "Personal floating platform with up/down controls",
+        Default = false,
+        Callback = function(value)
+            toggleXZXPlatform(value)
+        end
+    })
+
+    Sections.XZXPlatform:AddParagraph({
+        Title = "XZX PLATFORM FEATURES:",
+        Description = [[
+• 🏗️ Personal floating platform that follows you
+• ⬆️⬇️ Up/Down buttons to adjust platform height
+• 🎯 Smooth movement with tween animations
+• 🔒 Platform stays beneath you automatically
+• 🎨 Professional XZX branding with glow effects
+• 🎮 Easy to use with simple controls
+
+CONTROLS:
+• ▲ Button: Raise platform 5 studs
+• ▼ Button: Lower platform 5 studs
+• Platform automatically follows your XZ position
+• Character stays on top of platform
+]]
+    })
+
+    -- WALL CLIMB SYSTEM Section (ADDED TO CHARACTER)
+    Sections.Character:AddToggle("WallClimbToggle", {
+        Title = "WALL CLIMB SYSTEM",
+        Description = "Automatically climb walls when approaching them",
+        Default = false,
+        Callback = function(value)
+            toggleWallClimb(value)
+        end
+    })
+
+    Sections.Character:AddParagraph({
+        Title = "WALL CLIMB FEATURES:",
+        Description = [[
+🧗 SMART WALL CLIMBING:
+• Automatically detects walls in front of you
+• Smooth upward movement when wall detected
+• Height limit to prevent infinite climbing
+• Border detection to stop at boundaries
+
+🎯 HOW IT WORKS:
+• System runs every frame when enabled
+• Casts ray to detect walls within 5 studs
+• Activates climb when wall is detected
+• Stops at maximum height of 50 studs
+• Respects border boundaries
+
+CONTROLS:
+• Simply walk towards any wall to activate
+• System handles the climbing automatically
+• No additional keybinds required
+]]
+    })
+
+    -- XZX BOOSTS Section
+    Sections.BoostMain:AddToggle("XZXBoostsToggle", {
+        Title = "XZX BOOSTS MASTER TOGGLE",
+        Description = "Enable/Disable all boosts at once",
+        Default = false,
+        Callback = function(value)
+            XZXBoosts.Enabled = value
+            applyBoosts()
+            if value then
+                lib:Notification("XZX BOOSTS", "✅ BOOSTS ACTIVATED!", 3)
+            else
+                lib:Notification("XZX BOOSTS", "❌ BOOSTS DISABLED", 3)
+            end
+        end
+    })
+
+    Sections.BoostSettings:AddSlider("GravitySlider", {
+        Title = "Gravity Boost",
+        Description = "0 = Normal, 100 = Low Gravity",
+        Default = 0,
+        Min = 0,
+        Max = 100,
+        Rounding = 0,
+        Callback = function(value)
+            XZXBoosts.CurrentValues.Gravity = value
+            if XZXBoosts.Enabled then
+                applyBoosts()
+                lib:Notification("Gravity", "🌀 Gravity: " .. value, 2)
+            end
+        end
+    })
+
+    Sections.BoostSettings:AddSlider("SpeedSlider", {
+        Title = "Speed Boost", 
+        Description = "0 = Normal, 100 = Super Fast",
+        Default = 0,
+        Min = 0,
+        Max = 100,
+        Rounding = 0,
+        Callback = function(value)
+            XZXBoosts.CurrentValues.Speed = value
+            if XZXBoosts.Enabled then
+                applyBoosts()
+                lib:Notification("Speed", "⚡ Speed: " .. value, 2)
+            end
+        end
+    })
+
+    Sections.BoostSettings:AddSlider("JumpSlider", {
+        Title = "Jump Boost",
+        Description = "0 = Normal, 100 = High Jump",
+        Default = 0,
+        Min = 0,
+        Max = 100,
+        Rounding = 0,
+        Callback = function(value)
+            XZXBoosts.CurrentValues.Jump = value
+            if XZXBoosts.Enabled then
+                applyBoosts()
+                lib:Notification("Jump", "🦘 Jump: " .. value, 2)
+            end
+        end
+    })
+
+    -- CHARACTER Section (FLY REMOVED)
+    Sections.Character:AddToggle("GodModeToggle", {
+        Title = "GOD MODE",
+        Description = "Become invincible",
+        Default = false,
+        Callback = function(value)
+            toggleGodMode(value)
+        end
+    })
+
+    Sections.Character:AddButton({
+        Title = "RESET CHARACTER",
+        Description = "Kill and respawn your character",
+        Callback = function()
+            resetCharacter()
+        end
+    })
+
+    Sections.Character:AddButton({
+        Title = "TELEPORT TO SPAWN",
+        Description = "Instantly go to spawn point",
+        Callback = function()
+            teleportToSpawn()
+        end
+    })
+
+    -- DESYNC Section - SIMPLIFIED
+    Sections.Desync:AddButton({
+        Title = "ACTIVATE DESYNC",
+        Description = "Load external desync script",
+        Callback = function()
+            DESYNC()
+        end
+    })
+
+    Sections.Desync:AddParagraph({
+        Title = "DESYNC FEATURES:",
+        Description = [[
+🚀 EXTERNAL DESYNC SCRIPT:
+• Loads advanced desync functionality
+• Creates clone with full control
+• External script from pastebin
+• One-click activation
+
+⚠️ NOTE: Uses external desync script
+• May have additional features
+• Activated with single button
+]]
+    })
+
+    -- VISUAL Section (BRAINROT ESP REMOVED)
+    Sections.VisualMain:AddToggle("ESPToggle", {
+        Title = "ESP",
+        Description = "See players through walls",
+        Default = false,
+        Callback = function(value)
+            toggleESP(value)
+        end
+    })
+
+    Sections.VisualMain:AddToggle("MiniMapToggle", {
+        Title = "MINI MAP",
+        Description = "Toggle mini map display",
+        Default = false,
+        Callback = function(value)
+            toggleMiniMap()
+        end
+    })
+
+    Sections.VisualMain:AddButton({
+        Title = "TOGGLE FULLBRIGHT",
+        Description = "Brighten up the game world",
+        Callback = function()
+            GraphicsSettings.Fullbright = not GraphicsSettings.Fullbright
+            applyGraphicsSettings()
+            showNotification("Graphics", GraphicsSettings.Fullbright and "✅ Fullbright enabled" or "❌ Fullbright disabled", 2)
+        end
+    })
+
+    -- BRAINROT SPAWNER Section
+    Sections.BrainrotSpawner:AddButton({
+        Title = "🚀 START BRAINROT SPAWNER",
+        Description = "Load external Brainrot scripts - NOT OWNED BY XZX HUB",
+        Callback = function()
+            startBrainrotSpawner()
+        end
+    })
+
+    Sections.BrainrotSpawner:AddParagraph({
+        Title = "⚠️ EXTERNAL SCRIPT WARNING",
+        Description = [[
+This feature loads external scripts from third-party sources.
+
+• NOT developed or owned by XZX HUB
+• Use at your own risk
+• No support provided for external scripts
+• May be detected by anti-cheat systems
+]]
+    })
+
+    -- PRIVATE SERVER Section
+    Sections.PrivateServerMain:AddButton({
+        Title = "PRIVATE SERVER ⚠️PATCHED⚠️",
+        Description = "This feature is currently patched and unavailable",
+        Callback = function()
+            generatePrivateServer()
+        end
+    })
+
+    Sections.PrivateServerMain:AddButton({
+        Title = "COPY SERVER LINK",
+        Description = "Copy current server link to invite friends",
+        Callback = function()
+            copyServerLink()
+        end
+    })
+
+    Sections.PrivateServerMain:AddParagraph({
+        Title = "Private Server Status:",
+        Description = [[
+⚠️CURRENTLY PATCHED⚠️
+
+• Private server generation temporarily disabled
+• Server link copying still available
+• Working on alternative solutions
+• Check Discord for updates
+]]
+    })
+
+    -- BRAINROT FINDER SECTION
+    Sections.BrainrotFinderMain:AddTextbox({
+        Title = "FILTER:BRAINROT NAME",
+        Default = "",
+        PlaceholderText = "Enter brainrot name to track",
+        Callback = function(value)
+            addBrainrotToFilter(value)
+        end,
+    })
+
+    -- Circular toggle for SECRETS filter (MOVED NEXT TO GODS FILTER)
+    Sections.BrainrotFinderMain:AddToggle("SecretFilterToggle", {
+        Title = "FILTER: secrets",
+        Description = "Track only secret brainrot names",
+        Default = false,
+        Callback = function(value)
+            toggleSecretFilter(value)
+        end
+    })
+
+    -- Circular toggle for BRAINROT GODS filter (MOVED NEXT TO SECRETS FILTER)
+    Sections.BrainrotFinderMain:AddToggle("GodsFilterToggle", {
+        Title = "FILTER:BRAINROT GODS",
+        Description = "Track only brainrot gods names",
+        Default = false,
+        Callback = function(value)
+            toggleGodsFilter(value)
+        end
+    })
+
+    -- NEW: JOIN JOBLD SERVER FUNCTIONALITY
+    Sections.BrainrotFinderMain:AddTextbox({
+        Title = "JOIN JOBLD SERVER",
+        Default = "",
+        PlaceholderText = "Enter Job ID to join server",
+        Callback = function(value)
+            joinJobldServer(value)
+        end,
+    })
+
+    Sections.BrainrotFinderMain:AddButton({
+        Title = "START BRAINROT FINDER",
+        Description = "Begin tracking the brainrots in your filter list",
+        Callback = function()
+            startBrainrotFinder()
+        end
+    })
+
+    Sections.BrainrotFinderMain:AddButton({
+        Title = "RESET BRAINROT FILTER",
+        Description = "Clear all tracked brainrots and start fresh",
+        Callback = function()
+            BrainrotFinderConfig.brainrots_to_find = {}
+            FilterStates.Secrets = false
+            FilterStates.Gods = false
+            if lib then
+                lib:Notification("BRAINROT FINDER", "Brainrot filter reset - all names cleared", 3)
+            else
+                showNotification("BRAINROT FINDER", "Brainrot filter reset - all names cleared", 3)
+            end
+        end
+    })
+
+    Sections.BrainrotFinderMain:AddParagraph({
+        Title = "BRAINROT FINDER FEATURES:",
+        Description = [[
+TRACK SPECIFIC BRAINROTS:
+• Add brainrot names to filter using the textbox above
+• Use circular toggles for quick filter selection
+• System will notify you when tracked brainrots join
+• Auto-server hop when brainrot leaves (if enabled)
+
+WEBHOOK SYSTEM:
+• When using the "Secret" or "Brainrot God" filters, any Brainrot content discovered will be automatically shared to Discord.
+• Content found via the search bar filter will not be shared.
+• Please use the filters responsibly and be aware of how content is handled.
+
+SECRET FILTER:
+• Tracks " .. #SecretBrainrotNames .. " secret brainrot names
+• Automatically adds all secret names to filter
+• Perfect for finding rare brainrots
+
+BRAINROT GODS FILTER:
+• Tracks " .. #BrainrotGodsNames .. " brainrot gods names
+• Automatically adds all brainrot gods to filter
+• Find the most powerful brainrots
+
+JOIN JOBLD SERVER:
+• Enter any Job ID to join specific servers
+• Useful for joining friends or specific instances
+• Direct server teleportation
+
+EXCLUSIVE FILTERS:
+• Only one filter can be active at a time
+• Toggle between secrets and gods easily
+• Clear visual indication of active filter
+
+HOW TO USE:
+1. Type brainrot name in "FILTER:BRAINROT NAME" box OR
+2. Use circular toggles for quick filter selection
+3. Click "START BRAINROT FINDER" to begin tracking
+4. Get notified when targets are found!
+5. Use "JOIN JOBLD SERVER" to join specific servers
+
+NOTE: Uses external BrainrotFinder script
+]]
+    })
+
+    -- SETTINGS TAB - ONLY OPEN SETTINGS PAGE BUTTON
+    Sections.SettingsMain:AddButton({
+        Title = "OPEN SETTINGS PAGE",
+        Description = "Open full settings panel with all configuration options",
+        Callback = function()
+            openSettingsPage()
+        end
+    })
+
+    saveAllSettings()
+    menuLoadInProgress = false
+    
+    if GuiSettings.ShowWelcomeMessage then
+        lib:Notification('XZX HUB', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
+    end
+    
+    return true
+end
+
+-- SINGLE menu toggle function
+local function toggleMenu()
+    if menuLoadInProgress then
+        return
+    end
+    
+    if mainMenu then
+        mainMenu.Enabled = not mainMenu.Enabled
+        if mainMenu.Enabled then
+            showNotification("XZX HUB", "Menu shown - Press RightControl to hide", 3)
+        else
+            showNotification("XZX HUB", "Menu hidden - Press RightControl to show", 3)
+        end
+    else
+        loadMainMenu()
+    end
+end
+
+-- Cleanup function
+local function cleanup()
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    if deliveryConnection then
+        deliveryConnection:Disconnect()
+        deliveryConnection = nil
+    end
+    if miniMapConnection then
+        miniMapConnection:Disconnect()
+        miniMapConnection = nil
+    end
+    if miniMapGui then
+        miniMapGui:Destroy()
+        miniMapGui = nil
+    end
+    for _, child in pairs(espFolder:GetChildren()) do
+        child:Destroy()
+    end
+    
+    -- Cleanup enhanced graphics
+    DISABLE_ENHANCED_GRAPHICS()
+    
+    -- Cleanup fly
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    if bodyGyro then
+        bodyGyro:Destroy()
+        bodyGyro = nil
+    end
+    
+    -- Cleanup brainrot ESP
+    toggleBrainrotESP(false)
+    
+    -- Cleanup XZX Platform
+    if XZXPlatformEnabled then
+        toggleXZXPlatform(false)
+    end
+    
+    -- Cleanup Wall Climb
+    if wallClimbConnection then
+        wallClimbConnection:Disconnect()
+        wallClimbConnection = nil
+    end
+    WallClimbEnabled = false
+end
+
+-- SINGLE keybind handler
+local keybindConnection
+keybindConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        toggleMenu()
+    end
+end)
+
+-- Main execution - FIXED INTRO TIMING
+showXZXIntro(function()
+    loadAllSettings()
+    
+    -- Create XZX HUB label in the middle of the screen
+    createXZXHubCenterLabel()
+    
+    -- ✅ Auto-load menu after teleport if flag is set
+    local tpData = TeleportService:GetLocalPlayerTeleportData()
+    if tpData and tpData.AutoJoin == true then
+        task.wait(2) -- Wait for game to fully load
+        loadMainMenu()
+    else
+        -- Load menu immediately after intro without delay
+        loadMainMenu()
+    end
+    
+    task.delay(2, function()
+        showNotification("XZX HUB", "Loaded successfully! Press RightControl to toggle menu", 5)
+    end)
+end)
+
+-- Cleanup when player leaves
+game.Players.PlayerRemoving:Connect(function(leavingPlayer)
+    if leavingPlayer == player then
+        cleanup()
+        saveAllSettings()
+        if keybindConnection then
+            keybindConnection:Disconnect()
+        end
+    end
+end)
+
+-- Boost application loop
+RunService.RenderStepped:Connect(function()
+    if XZXBoosts.Enabled then
+        applyBoosts()
+    end
+end)
+
+-- ESP update loop
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if ESPEnabled then
+            updateESP()
+        end
+    end
+end)
