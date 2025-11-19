@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local correctKey = "JQ GOATED"
 
 local AllowedGames = {
-    [102500767640476] = "https://raw.githubusercontent.com/JQ43221/scripts/refs/heads/main/miami%20streets"
+    [102500767640476] = "https://raw.githubusercontent.com/dkhub43221/scripts/refs/heads/main/miami%20streets"
 }
 
 local gui = Instance.new("ScreenGui")
