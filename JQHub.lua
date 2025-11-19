@@ -1,346 +1,238 @@
---[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-
-local Window = Rayfield:CreateWindow({
-   Name = "✔JQHUB",
-   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-   LoadingTitle = "MADE BY CODYISTHETITS, and cracked by me",
-   LoadingSubtitle = "TB3",
-   Theme = "Ocean", -- Check https://docs.sirius.menu/rayfield/configuration/themes
-
-   DisableRayfieldPrompts = false,
-   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
-
-   ConfigurationSaving = {
-      Enabled = false,
-      FolderName = nil, -- Create a custom folder for your hub/game
-      FileName = "THA BRONX 3"
-   },
-
-   Discord = {
-      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
-   },
-
-   KeySystem = false, -- Set this to true to use our key system
-   KeySettings = {
-      Title = "✔JQHUB",
-      Subtitle = "✔JQHUB",
-      Note = ""DM ME" who would wanna dm you", -- Use this to tell the user how to get a key
-      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-      SaveKey = false, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"✔JQHUB"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
-   }
-})
-
-local mainTab = Window:CreateTab("main",nil) -- Title, Image
-local mainSection = mainTab:CreateSection("main")
-
-Rayfield:Notify({
-   Title = "U EXECUTED THE BEST SCRIPT BOIII",
-   Content = "ENJOY SONS",
-   Duration = 6.5,
-   Image = 4483362458,
-})
-
-local Button = mainTab:CreateButton({
-   Name = "infinite jump😊",
-   Callback = function()
-   --[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
-
-            
-local InfiniteJumpEnabled = true
-game:GetService("UserInputService").JumpRequest:connect(function()
-	if InfiniteJumpEnabled then
-		game:GetService"Players".LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
-	end
-end)
-   end,
-})
-
-local Slider = mainTab:CreateSlider({
-   Name = "walkspeed",
-   Range = {0, 500},
-   Increment = 1,
-   Suffix = "WALKSPEED",
-   CurrentValue = 16,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-           game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
-   end,
-})
-
-local Dropdown = mainTab:CreateDropdown({
-   Name = "TELEPORT",
-   Options = {"ANTI","USEFULL"},
-   CurrentOption = {"STARTER ISLAND"},
-   MultipleOptions = false,
-   Flag = "TELEPORT", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Options)
-        print(Options)
-   end,
-})
-
-local ESPTab = Window:CreateTab("ESPTab", nil) -- Title, Image
-local ESPSection = ESPTab:CreateSection("ESPTab")
-
-local Toggle = ESPTab:CreateToggle({
-   Name = "ESP TOGGLE",
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-        -- ESP Script Example in Roblox
-
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local Player = Players.LocalPlayer
-local Camera = game.Workspace.CurrentCamera
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local player = Players.LocalPlayer
 
--- Function to create a 3D box around the target
-local function createESP(player)
-    -- Make sure the player has a character
-    if player.Character and player.Character:FindFirstChild("Head") then
-        -- Create ESP Box
-        local espBox = Instance.new("BoxHandleAdornment")
-        espBox.Adornee = player.Character:WaitForChild("Head")
-        espBox.Size = Vector3.new(2, 2, 2) -- You can adjust the size here
-        espBox.Color3 = Color3.fromRGB(255, 0, 0) -- Red color for ESP
-        espBox.AlwaysOnTop = true
-        espBox.ZIndex = 10
-        espBox.Parent = player.Character
-        espBox.Visible = true
+local correctKey = "Winter"
 
-        -- Cleanup when the player leaves or the character is removed
-        player.CharacterAdded:Connect(function()
-            espBox:Destroy()
-        end)
+local AllowedGames = {
+    [102500767640476] = "https://raw.githubusercontent.com/dkhub43221/scripts/refs/heads/main/miami%20streets"
+}
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "DK_HUB_GUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local blur = Instance.new("BlurEffect")
+blur.Size = 0
+blur.Parent = Lighting
+TweenService:Create(blur, TweenInfo.new(0.5), {Size = 24}):Play()
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 360, 0, 180)
+frame.Position = UDim2.new(0.5, -180, 0.5, -90)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local outline = Instance.new("UIStroke")
+outline.Thickness = 3
+outline.Color = Color3.fromRGB(0, 255, 0)
+outline.Parent = frame
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(0, 255, 0)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = frame
+
+local prem = Instance.new("TextLabel")
+prem.Size = UDim2.new(1, -20, 0, 20)
+prem.Position = UDim2.new(0, 10, 0, 45)
+prem.BackgroundTransparency = 1
+prem.Text = "Don’t want to wait? Purchase Premium!"
+prem.TextColor3 = Color3.fromRGB(255, 255, 255)
+prem.TextSize = 14
+prem.Font = Enum.Font.GothamSemibold
+prem.Parent = frame
+prem.MouseEnter:Connect(function() prem.TextColor3 = Color3.fromRGB(0, 255, 0) end)
+prem.MouseLeave:Connect(function() prem.TextColor3 = Color3.fromRGB(255, 255, 255) end)
+
+local function typeTitle(t, s)
+    s = s or 0.1
+    title.Text = ""
+    for i = 1, #t do
+        title.Text = t:sub(1, i)
+        task.wait(s)
     end
 end
 
--- Loop through all players in the game and create ESP for each one
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= Player then
-        createESP(player)
-    end
-end
-
--- Listen for new players joining
-Players.PlayerAdded:Connect(function(player)
-    if player ~= Player then
-        createESP(player)
+task.spawn(function()
+    while true do
+        typeTitle("JQ HUB")
+        task.wait(0.5)
+        title.Text = ""
+        task.wait(0.5)
     end
 end)
 
-   end,
-})
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -35, 0, 5)
+close.BackgroundTransparency = 1
+close.Text = "X"
+close.TextColor3 = Color3.fromRGB(255, 255, 255)
+close.TextScaled = true
+close.Font = Enum.Font.GothamBold
+close.Parent = frame
+close.MouseButton1Click:Connect(function()
+    gui:Destroy()
+    blur:Destroy()
+end)
 
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(1, -40, 0, 35)
+box.Position = UDim2.new(0, 20, 0, 70)
+box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+box.PlaceholderText = "Enter your key..."
+box.TextColor3 = Color3.fromRGB(255, 255, 255)
+box.PlaceholderColor3 = Color3.fromRGB(160, 160, 160)
+box.Font = Enum.Font.Gotham
+box.TextSize = 14
+box.Parent = frame
 
-local Aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua"))()
-Aimbot.Load()
-local TeleportTab = Window:CreateTab("Teleport", nil) -- Create a tab for teleportation
-local TeleportSection = TeleportTab:CreateSection("Teleport System")
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 6)
+boxCorner.Parent = box
 
-local SelectedPlayer = nil
+local buttonHolder = Instance.new("Frame")
+buttonHolder.Size = UDim2.new(1, -40, 0, 35)
+buttonHolder.Position = UDim2.new(0, 20, 0, 115)
+buttonHolder.BackgroundTransparency = 1
+buttonHolder.Parent = frame
 
--- Function to get all player names except yourself
-local function GetPlayers()
-    local playerNames = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            table.insert(playerNames, player.Name)
-        end
-    end
-    return playerNames
+local function createButton(text, pos)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0.48, 0, 1, 0)
+    b.Position = UDim2.new(pos, 0, 0, 0)
+    b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.GothamBold
+    b.Text = text
+    b.TextSize = 14
+    b.Parent = buttonHolder
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = b
+    return b
 end
 
--- Dropdown for selecting a player
-local PlayerDropdown = TeleportTab:CreateDropdown({
-    Name = "Select Player",
-    Options = GetPlayers(),
-    CurrentOption = nil,
-    MultipleOptions = false,
-    Flag = "TeleportPlayer",
-    Callback = function(option)
-        SelectedPlayer = option
-    end,
-})
+local checkBtn = createButton("Check Key", 0)
+local getKeyBtn = createButton("Get Key!", 0.52)
 
--- Function to get a player's character safely
-local function GetPlayerCharacter(playerName)
-    local player = game.Players:FindFirstChild(playerName)
-    if player then
-        local character = player.Character or player.CharacterAdded:Wait()
-        while not character:FindFirstChild("HumanoidRootPart") do
-            task.wait(0.1)
-        end
-        return character
+getKeyBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard("https://discord.gg/vfSYaEX5")
+        StarterGui:SetCore("SendNotification", {
+            Title = "Discord Link Copied",
+            Text = "Go to #get-scripts",
+            Duration = 4
+        })
     end
-    return nil
+end)
+
+local rememberFrame = Instance.new("Frame")
+rememberFrame.Size = UDim2.new(1, -40, 0, 25)
+rememberFrame.Position = UDim2.new(0, 20, 0, 155)
+rememberFrame.BackgroundTransparency = 1
+rememberFrame.Parent = frame
+
+local rememberLabel = Instance.new("TextLabel")
+rememberLabel.Size = UDim2.new(0.8, 0, 1, 0)
+rememberLabel.BackgroundTransparency = 1
+rememberLabel.Text = "Remember Key"
+rememberLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+rememberLabel.Font = Enum.Font.Gotham
+rememberLabel.TextSize = 14
+rememberLabel.TextXAlignment = Enum.TextXAlignment.Left
+rememberLabel.Parent = rememberFrame
+
+local checkbox = Instance.new("Frame")
+checkbox.Size = UDim2.new(0, 20, 0, 20)
+checkbox.Position = UDim2.new(0.8, 0, 0, 2)
+checkbox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+checkbox.Parent = rememberFrame
+
+local checkboxCorner = Instance.new("UICorner")
+checkboxCorner.CornerRadius = UDim.new(0, 4)
+checkboxCorner.Parent = checkbox
+
+local tick = Instance.new("Frame")
+tick.Size = UDim2.new(0, 0, 0, 0)
+tick.Position = UDim2.new(0, 2, 0, 2)
+tick.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+tick.Parent = checkbox
+
+local tickCorner = Instance.new("UICorner")
+tickCorner.CornerRadius = UDim.new(0, 2)
+tickCorner.Parent = tick
+
+local checkboxBtn = Instance.new("TextButton")
+checkboxBtn.Size = UDim2.new(1, 0, 1, 0)
+checkboxBtn.BackgroundTransparency = 1
+checkboxBtn.Text = ""
+checkboxBtn.Parent = checkbox
+
+local rememberState = false
+local savedKey = player:GetAttribute("SavedKey")
+
+if savedKey then
+    box.Text = savedKey
+    rememberState = true
+    tick:TweenSize(UDim2.new(1, -4, 1, -4), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
 end
 
--- Function to teleport to selected player
-local function TeleportToPlayer()
-    if SelectedPlayer then
-        local localPlayer = game.Players.LocalPlayer
-        local targetCharacter = GetPlayerCharacter(SelectedPlayer)
-
-        if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
-            local localCharacter = localPlayer.Character
-            if localCharacter and localCharacter:FindFirstChild("HumanoidRootPart") then
-                -- Teleport slightly above the target to avoid overlap
-                localCharacter:SetPrimaryPartCFrame(targetCharacter.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0))
-
-                Rayfield:Notify({
-                    Title = "Teleport Success",
-                    Content = "Teleported to " .. SelectedPlayer,
-                    Duration = 3,
-                })
-            end
-        else
-            Rayfield:Notify({
-                Title = "Teleport Failed",
-                Content = "Player not found or not loaded!",
-                Duration = 3,
-            })
-        end
+checkboxBtn.MouseButton1Click:Connect(function()
+    rememberState = not rememberState
+    if rememberState then
+        tick:TweenSize(UDim2.new(1, -4, 1, -4), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
     else
-        Rayfield:Notify({
-            Title = "Teleport Failed",
-            Content = "No player selected!",
-            Duration = 3,
+        tick:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+    end
+end)
+
+local function checkKey()
+    if box.Text ~= correctKey then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Invalid Key",
+            Text = "Please enter the correct key.",
+            Duration = 3
+        })
+        return
+    end
+
+    if rememberState then
+        player:SetAttribute("SavedKey", box.Text)
+    else
+        player:SetAttribute("SavedKey", nil)
+    end
+
+    local scriptUrl = AllowedGames[game.PlaceId] or AllowedGames[game.GameId]
+
+    if scriptUrl then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Key Accepted",
+            Text = "Loading script...",
+            Duration = 3
+        })
+        gui:Destroy()
+        blur:Destroy()
+        loadstring(game:HttpGet(scriptUrl))()
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "Wrong Game",
+            Text = "This script cannot run here.",
+            Duration = 4
         })
     end
 end
 
--- Create a teleport button
-local TeleportButton = TeleportTab:CreateButton({
-    Name = "Teleport",
-    Callback = function()
-        TeleportToPlayer()
-    end,
-})
-
--- Update dropdown when players join or leave
-game.Players.PlayerAdded:Connect(function()
-    PlayerDropdown:SetOptions(GetPlayers())
-end)
-
-game.Players.PlayerRemoving:Connect(function()
-    PlayerDropdown:SetOptions(GetPlayers())
-end)
-
-local GUNSTab = Window:CreateTab("GUNS",nil) -- Title, Image
-local Section = GUNSTab:CreateSection("GUNS")
-
-local Button = GUNSTab:CreateButton({
-   Name = "DUPEGUNS",
-   Callback = function()
-        -- Script for duplicating an item in a player's inventory
-local Players = game:GetService("Players")
-
--- Function to duplicate a specific item in player's backpack
-local function duplicateItem(player, itemName)
-    -- Get the player's Backpack
-    local backpack = player.Backpack
-    
-    -- Search for the item in the backpack
-    for _, item in ipairs(backpack:GetChildren()) do
-        if item.Name == itemName then
-            -- Create a copy of the item
-            local itemClone = item:Clone()
-            
-            -- Parent the clone to the player's backpack to duplicate the item
-            itemClone.Parent = backpack
-            break
-        end
-    end
-end
-
--- Example: Duplicate a specific item when the player touches a part or performs an action
-game.Workspace.DuplicateButton.Touched:Connect(function(hit)
-    local player = Players:GetPlayerFromCharacter(hit.Parent)
-    
-    if player then
-        -- Call the duplicateItem function to duplicate a "ToolName" item
-        duplicateItem(player, "ToolName")  -- Replace "ToolName" with the name of the item you want to duplicate
-    end
-end)
-
-
-   end,
-})
-
-local Toggle = ESPTab:CreateToggle({
-   Name = "NAMES",
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-         -- ESP Script to display player names above their head in Roblox
-
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Camera = game.Workspace.CurrentCamera
-
--- Function to create name ESP
-local function createNameESP(player)
-    -- Make sure the player has a character
-    if player.Character and player.Character:FindFirstChild("Head") then
-        -- Create a BillboardGui to display the name above the player
-        local billboard = Instance.new("BillboardGui")
-        billboard.Adornee = player.Character:WaitForChild("Head")
-        billboard.Size = UDim2.new(0, 100, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 3, 0) -- Adjust the height of the name
-        billboard.AlwaysOnTop = true
-        billboard.Parent = player.Character
-
-        -- Create the text label for the player's name
-        local label = Instance.new("TextLabel")
-        label.Text = player.Name
-        label.TextSize = 10
-        label.TextColor3 = Color3.fromRGB(255, 255, 255) -- White color for name
-        label.BackgroundTransparency = 1
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.Parent = billboard
-        
-        -- Cleanup when the player leaves or the character is removed
-        player.CharacterAdded:Connect(function()
-            billboard:Destroy()
-        end)
-    end
-end
-
--- Loop through all players in the game and create name ESP for each one
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= Player then
-        createNameESP(player)
-    end
-end
-
--- Listen for new players joining
-Players.PlayerAdded:Connect(function(player)
-    if player ~= Player then
-        createNameESP(player)
-    end
-end)
-
-   end,
-})
-
-local Slider = mainTab:CreateSlider({
-   Name = "Jumppower",
-   Range = {0, 400},
-   Increment = 1,
-   Suffix = "Jumppower",
-   CurrentValue = 10,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-      game.Players.LocalPlayer.Character.Jumppower = (Value)
-   end,
-})
+checkBtn.MouseButton1Click:Connect(checkKey)
