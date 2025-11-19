@@ -4,14 +4,14 @@ local Lighting = game:GetService("Lighting")
 local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
-local correctKey = "Winter"
+local correctKey = "JQ GOATED"
 
 local AllowedGames = {
-    [102500767640476] = "https://raw.githubusercontent.com/dkhub43221/scripts/refs/heads/main/miami%20streets"
+    [102500767640476] = "https://raw.githubusercontent.com/JQ43221/scripts/refs/heads/main/miami%20streets"
 }
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "DK_HUB_GUI"
+gui.Name = "JQ HUB_GUI"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -130,7 +130,7 @@ local getKeyBtn = createButton("Get Key!", 0.52)
 
 getKeyBtn.MouseButton1Click:Connect(function()
     if setclipboard then
-        setclipboard("https://discord.gg/vfSYaEX5")
+        setclipboard("https://discord.gg/vfvq9Ebf")
         StarterGui:SetCore("SendNotification", {
             Title = "Discord Link Copied",
             Text = "Go to #get-scripts",
