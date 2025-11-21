@@ -1,5 +1,5 @@
 
--- XZR HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
+-- CRAKCED HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -41,7 +41,7 @@ pcall(function()
     local playerGui = player:FindFirstChild("PlayerGui")
     if playerGui then
         for _, gui in pairs(playerGui:GetChildren()) do
-            if gui:IsA("ScreenGui") and (gui.Name:find("XZR") or gui.Name:find("Main") or gui.Name:find("Library")) then
+            if gui:IsA("ScreenGui") and (gui.Name:find("CRAKCED") or gui.Name:find("Main") or gui.Name:find("Library")) then
                 gui:Destroy()
             end
         end
@@ -248,8 +248,8 @@ local FilterStates = {
     Gods = false
 }
 
--- XZR BOOSTS SYSTEM
-local XZRBoosts = {
+-- CRAKCED BOOSTS SYSTEM
+local CRAKCEDBoosts = {
     Enabled = false,
     OriginalValues = {
         Gravity = workspace.Gravity,
@@ -291,9 +291,9 @@ local deliveryConnection = nil
 -- AUTO JOIN SYSTEM
 _G.AutoJoinEnabled = false
 
--- XZR PLATFORM (STANDARD)
-local XZRPlatformEnabled = false
-local XZRPlatform = nil
+-- CRAKCED PLATFORM (STANDARD)
+local CRAKCEDPlatformEnabled = false
+local CRAKCEDPlatform = nil
 local platformGUI = nil
 local platformConnection = nil
 
@@ -311,8 +311,8 @@ local stopClimb = false
 local playerSpawnPosition = Vector3.new(0, 25, 0)
 local checkpointPosition = Vector3.new(0, 25, 0)
 
--- Function to create XZR HUB center label
-local function createXZRHubCenterLabel()
+-- Function to create CRAKCED HUB center label
+local function createCRAKCEDHubCenterLabel()
     -- Services
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
@@ -321,7 +321,7 @@ local function createXZRHubCenterLabel()
 
     -- Create ScreenGui
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "XZRHubCenter"
+    screenGui.Name = "CRAKCEDHubCenter"
     screenGui.Parent = PlayerGui
 
     -- Create TextLabel (smaller and centered)
@@ -330,7 +330,7 @@ local function createXZRHubCenterLabel()
     label.Position = UDim2.new(0.5, 0, 0.5, 0)
     label.AnchorPoint = Vector2.new(0.5, 0.5)
     label.BackgroundTransparency = 1
-    label.Text = "XZR HUB"
+    label.Text = "CRAKCED HUB"
     label.TextColor3 = Color3.fromRGB(0, 0, 0)
     label.TextScaled = true
     label.Font = Enum.Font.GothamBold
@@ -360,10 +360,10 @@ local function createXZRHubCenterLabel()
     return screenGui
 end
 
-local function createXZRPlatform()
-    if XZRPlatform then
-        XZRPlatform:Destroy()
-        XZRPlatform = nil
+local function createCRAKCEDPlatform()
+    if CRAKCEDPlatform then
+        CRAKCEDPlatform:Destroy()
+        CRAKCEDPlatform = nil
     end
     
     if platformGUI then
@@ -371,23 +371,23 @@ local function createXZRPlatform()
         platformGUI = nil
     end
     
-    XZRPlatform = Instance.new("Part")
-    XZRPlatform.Size = Vector3.new(12, 1, 12)
-    XZRPlatform.Anchored = true
-    XZRPlatform.Color = Color3.fromRGB(10, 10, 10)
-    XZRPlatform.Material = Enum.Material.SmoothPlastic
-    XZRPlatform.CanCollide = true
-    XZRPlatform.Name = "XZRPlatform"
-    XZRPlatform.Parent = workspace
+    CRAKCEDPlatform = Instance.new("Part")
+    CRAKCEDPlatform.Size = Vector3.new(12, 1, 12)
+    CRAKCEDPlatform.Anchored = true
+    CRAKCEDPlatform.Color = Color3.fromRGB(10, 10, 10)
+    CRAKCEDPlatform.Material = Enum.Material.SmoothPlastic
+    CRAKCEDPlatform.CanCollide = true
+    CRAKCEDPlatform.Name = "CRAKCEDPlatform"
+    CRAKCEDPlatform.Parent = workspace
 
     local highlight = Instance.new("Highlight")
-    highlight.Parent = XZRPlatform
+    highlight.Parent = CRAKCEDPlatform
     highlight.FillTransparency = 1
     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.OutlineTransparency = 0.25
 
     local surfaceGui = Instance.new("SurfaceGui")
-    surfaceGui.Parent = XZRPlatform
+    surfaceGui.Parent = CRAKCEDPlatform
     surfaceGui.Face = Enum.NormalId.Top
     surfaceGui.CanvasSize = Vector2.new(500, 500)
     surfaceGui.AlwaysOnTop = true
@@ -395,14 +395,14 @@ local function createXZRPlatform()
     local text = Instance.new("TextLabel")
     text.Size = UDim2.new(1, 0, 1, 0)
     text.BackgroundTransparency = 1
-    text.Text = "XZR"
+    text.Text = "CRAKCED"
     text.TextColor3 = Color3.fromRGB(255, 255, 255)
     text.Font = Enum.Font.GothamBold
     text.TextScaled = true
     text.Parent = surfaceGui
 
     task.spawn(function()
-        while XZRPlatform and XZRPlatform.Parent do
+        while CRAKCEDPlatform and CRAKCEDPlatform.Parent do
             local pulse = math.sin(tick() * 2) * 0.5 + 0.5
             text.TextTransparency = 0.15 + (1 - pulse) * 0.25
             task.wait(0.05)
@@ -413,13 +413,13 @@ local function createXZRPlatform()
     if character and character:FindFirstChild("HumanoidRootPart") then
         local hrp = character.HumanoidRootPart
         local baseY = hrp.Position.Y - 5
-        XZRPlatform.Position = Vector3.new(hrp.Position.X, baseY, hrp.Position.Z)
+        CRAKCEDPlatform.Position = Vector3.new(hrp.Position.X, baseY, hrp.Position.Z)
     else
-        XZRPlatform.Position = Vector3.new(0, 25, 0)
+        CRAKCEDPlatform.Position = Vector3.new(0, 25, 0)
     end
 
     platformGUI = Instance.new("ScreenGui")
-    platformGUI.Name = "XZRPlatformGUI"
+    platformGUI.Name = "CRAKCEDPlatformGUI"
     platformGUI.ResetOnSpawn = false
     platformGUI.Parent = player:WaitForChild("PlayerGui")
     platformGUI.DisplayOrder = 5
@@ -445,13 +445,13 @@ local function createXZRPlatform()
     local moving = false
 
     local function movePlatform(direction)
-        if moving or not XZRPlatform then return end
+        if moving or not CRAKCEDPlatform then return end
         moving = true
         
-        local goalY = XZRPlatform.Position.Y + (direction * moveStep)
-        local goal = {Position = Vector3.new(XZRPlatform.Position.X, goalY, XZRPlatform.Position.Z)}
+        local goalY = CRAKCEDPlatform.Position.Y + (direction * moveStep)
+        local goal = {Position = Vector3.new(CRAKCEDPlatform.Position.X, goalY, CRAKCEDPlatform.Position.Z)}
         local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-        local tween = TweenService:Create(XZRPlatform, tweenInfo, goal)
+        local tween = TweenService:Create(CRAKCEDPlatform, tweenInfo, goal)
         tween:Play()
         tween.Completed:Wait()
         
@@ -466,16 +466,16 @@ local function createXZRPlatform()
     end
     
     platformConnection = RunService.Heartbeat:Connect(function()
-        if not XZRPlatform or not XZRPlatformEnabled then return end
+        if not CRAKCEDPlatform or not CRAKCEDPlatformEnabled then return end
         
         local character = player.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
             local hrp = character.HumanoidRootPart
-            local currentY = XZRPlatform.Position.Y
+            local currentY = CRAKCEDPlatform.Position.Y
             local newPos = Vector3.new(hrp.Position.X, currentY, hrp.Position.Z)
-            XZRPlatform.Position = newPos
+            CRAKCEDPlatform.Position = newPos
             
-            local platformTopY = XZRPlatform.Position.Y + XZRPlatform.Size.Y/2
+            local platformTopY = CRAKCEDPlatform.Position.Y + CRAKCEDPlatform.Size.Y/2
             local distance = hrp.Position.Y - platformTopY
             
             if distance < 0 then
@@ -485,23 +485,23 @@ local function createXZRPlatform()
         end
     end)
 
-    return XZRPlatform
+    return CRAKCEDPlatform
 end
 
-local function toggleXZRPlatform(value)
-    XZRPlatformEnabled = value
+local function toggleCRAKCEDPlatform(value)
+    CRAKCEDPlatformEnabled = value
     
-    if XZRPlatformEnabled then
-        createXZRPlatform()
+    if CRAKCEDPlatformEnabled then
+        createCRAKCEDPlatform()
         if lib then
-            lib:Notification("XZR Platform", "✅ XZR Platform activated with controls!", 3)
+            lib:Notification("CRAKCED Platform", "✅ CRAKCED Platform activated with controls!", 3)
         else
-            showNotification("XZR Platform", "✅ XZR Platform activated with controls!", 3)
+            showNotification("CRAKCED Platform", "✅ CRAKCED Platform activated with controls!", 3)
         end
     else
-        if XZRPlatform then
-            XZRPlatform:Destroy()
-            XZRPlatform = nil
+        if CRAKCEDPlatform then
+            CRAKCEDPlatform:Destroy()
+            CRAKCEDPlatform = nil
         end
         if platformGUI then
             platformGUI:Destroy()
@@ -512,9 +512,9 @@ local function toggleXZRPlatform(value)
             platformConnection = nil
         end
         if lib then
-            lib:Notification("XZR Platform", "❌ XZR Platform disabled", 2)
+            lib:Notification("CRAKCED Platform", "❌ CRAKCED Platform disabled", 2)
         else
-            showNotification("XZR Platform", "❌ XZR Platform disabled", 2)
+            showNotification("CRAKCED Platform", "❌ CRAKCED Platform disabled", 2)
         end
     end
 end
@@ -615,27 +615,27 @@ local function saveAllSettings()
     pcall(function()
         if player then
             -- Save GUI settings
-            player:SetAttribute("XZR_ThemeColor_R", GuiSettings.ThemeColor.R)
-            player:SetAttribute("XZR_ThemeColor_G", GuiSettings.ThemeColor.G)
-            player:SetAttribute("XZR_ThemeColor_B", GuiSettings.ThemeColor.B)
-            player:SetAttribute("XZR_HideWatermark", GuiSettings.HideWatermark)
-            player:SetAttribute("XZR_NotificationDuration", GuiSettings.NotificationDuration)
-            player:SetAttribute("XZR_AutoSaveSettings", GuiSettings.AutoSaveSettings)
-            player:SetAttribute("XZR_ShowWelcomeMessage", GuiSettings.ShowWelcomeMessage)
+            player:SetAttribute("CRAKCED_ThemeColor_R", GuiSettings.ThemeColor.R)
+            player:SetAttribute("CRAKCED_ThemeColor_G", GuiSettings.ThemeColor.G)
+            player:SetAttribute("CRAKCED_ThemeColor_B", GuiSettings.ThemeColor.B)
+            player:SetAttribute("CRAKCED_HideWatermark", GuiSettings.HideWatermark)
+            player:SetAttribute("CRAKCED_NotificationDuration", GuiSettings.NotificationDuration)
+            player:SetAttribute("CRAKCED_AutoSaveSettings", GuiSettings.AutoSaveSettings)
+            player:SetAttribute("CRAKCED_ShowWelcomeMessage", GuiSettings.ShowWelcomeMessage)
             
             -- Save Graphics settings
-            player:SetAttribute("XZR_QualityLevel", GraphicsSettings.QualityLevel)
-            player:SetAttribute("XZR_Shadows", GraphicsSettings.Shadows)
-            player:SetAttribute("XZR_AntiAliasing", GraphicsSettings.AntiAliasing)
-            player:SetAttribute("XZR_RenderDistance", GraphicsSettings.RenderDistance)
-            player:SetAttribute("XZR_Fullbright", GraphicsSettings.Fullbright)
-            player:SetAttribute("XZR_FrameRateLimit", GraphicsSettings.FrameRateLimit)
-            player:SetAttribute("XZR_VSync", GraphicsSettings.VSync)
-            player:SetAttribute("XZR_ParticleQuality", GraphicsSettings.ParticleQuality)
-            player:SetAttribute("XZR_EnhancedGraphics", GraphicsSettings.EnhancedGraphics)
+            player:SetAttribute("CRAKCED_QualityLevel", GraphicsSettings.QualityLevel)
+            player:SetAttribute("CRAKCED_Shadows", GraphicsSettings.Shadows)
+            player:SetAttribute("CRAKCED_AntiAliasing", GraphicsSettings.AntiAliasing)
+            player:SetAttribute("CRAKCED_RenderDistance", GraphicsSettings.RenderDistance)
+            player:SetAttribute("CRAKCED_Fullbright", GraphicsSettings.Fullbright)
+            player:SetAttribute("CRAKCED_FrameRateLimit", GraphicsSettings.FrameRateLimit)
+            player:SetAttribute("CRAKCED_VSync", GraphicsSettings.VSync)
+            player:SetAttribute("CRAKCED_ParticleQuality", GraphicsSettings.ParticleQuality)
+            player:SetAttribute("CRAKCED_EnhancedGraphics", GraphicsSettings.EnhancedGraphics)
             
-            player:SetAttribute("XZR_MenuLoaded", true)
-            player:SetAttribute("XZR_MenuLastOpen", os.time())
+            player:SetAttribute("CRAKCED_MenuLoaded", true)
+            player:SetAttribute("CRAKCED_MenuLastOpen", os.time())
         end
     end)
 end
@@ -644,36 +644,36 @@ local function loadAllSettings()
     pcall(function()
         if player then
             -- Load GUI settings
-            local themeR = player:GetAttribute("XZR_ThemeColor_R")
-            local themeG = player:GetAttribute("XZR_ThemeColor_G")
-            local themeB = player:GetAttribute("XZR_ThemeColor_B")
+            local themeR = player:GetAttribute("CRAKCED_ThemeColor_R")
+            local themeG = player:GetAttribute("CRAKCED_ThemeColor_G")
+            local themeB = player:GetAttribute("CRAKCED_ThemeColor_B")
             if themeR and themeG and themeB then
                 GuiSettings.ThemeColor = Color3.new(themeR, themeG, themeB)
             end
             
-            GuiSettings.HideWatermark = player:GetAttribute("XZR_HideWatermark") or false
-            GuiSettings.NotificationDuration = player:GetAttribute("XZR_NotificationDuration") or 3
-            GuiSettings.AutoSaveSettings = player:GetAttribute("XZR_AutoSaveSettings") or false
-            GuiSettings.ShowWelcomeMessage = player:GetAttribute("XZR_ShowWelcomeMessage") or true
+            GuiSettings.HideWatermark = player:GetAttribute("CRAKCED_HideWatermark") or false
+            GuiSettings.NotificationDuration = player:GetAttribute("CRAKCED_NotificationDuration") or 3
+            GuiSettings.AutoSaveSettings = player:GetAttribute("CRAKCED_AutoSaveSettings") or false
+            GuiSettings.ShowWelcomeMessage = player:GetAttribute("CRAKCED_ShowWelcomeMessage") or true
             
             -- Load Graphics settings
-            GraphicsSettings.QualityLevel = player:GetAttribute("XZR_QualityLevel") or 3
-            GraphicsSettings.Shadows = player:GetAttribute("XZR_Shadows") ~= false
-            GraphicsSettings.AntiAliasing = player:GetAttribute("XZR_AntiAliasing") ~= false
-            GraphicsSettings.RenderDistance = player:GetAttribute("XZR_RenderDistance") or 500
-            GraphicsSettings.Fullbright = player:GetAttribute("XZR_Fullbright") or false
-            GraphicsSettings.FrameRateLimit = player:GetAttribute("XZR_FrameRateLimit") or 60
-            GraphicsSettings.VSync = player:GetAttribute("XZR_VSync") or false
-            GraphicsSettings.ParticleQuality = player:GetAttribute("XZR_ParticleQuality") or "Medium"
-            GraphicsSettings.EnhancedGraphics = player:GetAttribute("XZR_EnhancedGraphics") or "None"
+            GraphicsSettings.QualityLevel = player:GetAttribute("CRAKCED_QualityLevel") or 3
+            GraphicsSettings.Shadows = player:GetAttribute("CRAKCED_Shadows") ~= false
+            GraphicsSettings.AntiAliasing = player:GetAttribute("CRAKCED_AntiAliasing") ~= false
+            GraphicsSettings.RenderDistance = player:GetAttribute("CRAKCED_RenderDistance") or 500
+            GraphicsSettings.Fullbright = player:GetAttribute("CRAKCED_Fullbright") or false
+            GraphicsSettings.FrameRateLimit = player:GetAttribute("CRAKCED_FrameRateLimit") or 60
+            GraphicsSettings.VSync = player:GetAttribute("CRAKCED_VSync") or false
+            GraphicsSettings.ParticleQuality = player:GetAttribute("CRAKCED_ParticleQuality") or "Medium"
+            GraphicsSettings.EnhancedGraphics = player:GetAttribute("CRAKCED_EnhancedGraphics") or "None"
             
-            menuLoaded = player:GetAttribute("XZR_MenuLoaded") or false
+            menuLoaded = player:GetAttribute("CRAKCED_MenuLoaded") or false
         end
     end)
 end
 
--- CINEMATIC XZR INTRO WITH SMOOTH FADE (EXTENDED BY 2 SECONDS)
-local function showXZRIntro(callback)
+-- CINEMATIC CRAKCED INTRO WITH SMOOTH FADE (EXTENDED BY 2 SECONDS)
+local function showCRAKCEDIntro(callback)
     local TS = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
     local plr = game.Players.LocalPlayer
@@ -681,7 +681,7 @@ local function showXZRIntro(callback)
     local gui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
     gui.IgnoreGuiInset = true
     gui.ResetOnSpawn = false
-    gui.Name = "XZR_RotatingIntroSmoothFade"
+    gui.Name = "CRAKCED_RotatingIntroSmoothFade"
 
     -- Background container (rotates)
     local bgContainer = Instance.new("Frame", gui)
@@ -725,7 +725,7 @@ local function showXZRIntro(callback)
     local logo = Instance.new("TextLabel", gui)
     logo.Size = UDim2.fromScale(1,1)
     logo.BackgroundTransparency = 1
-    logo.Text = "XZR HUB"
+    logo.Text = "CRAKCED HUB"
     logo.TextColor3 = Color3.new(0,0,0)
     logo.Font = Enum.Font.GothamBlack
     logo.TextScaled = true
@@ -1074,47 +1074,47 @@ local function toggleDeliverySteal(value)
     end)
 end
 
--- XZR BOOSTS FUNCTIONS
+-- CRAKCED BOOSTS FUNCTIONS
 local function applyBoosts()
     local character = player.Character
     if not character then return end
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
 
-    if XZRBoosts.Enabled then
-        if XZRBoosts.CurrentValues.Gravity > 0 then
-            local gravityMult = 1 - (XZRBoosts.CurrentValues.Gravity / 100)
-            workspace.Gravity = math.clamp(XZRBoosts.OriginalValues.Gravity * gravityMult, 1, XZRBoosts.OriginalValues.Gravity)
+    if CRAKCEDBoosts.Enabled then
+        if CRAKCEDBoosts.CurrentValues.Gravity > 0 then
+            local gravityMult = 1 - (CRAKCEDBoosts.CurrentValues.Gravity / 100)
+            workspace.Gravity = math.clamp(CRAKCEDBoosts.OriginalValues.Gravity * gravityMult, 1, CRAKCEDBoosts.OriginalValues.Gravity)
         else
-            workspace.Gravity = XZRBoosts.OriginalValues.Gravity
+            workspace.Gravity = CRAKCEDBoosts.OriginalValues.Gravity
         end
 
-        if XZRBoosts.CurrentValues.Speed > 0 then
-            local speedMult = 1 + (XZRBoosts.CurrentValues.Speed / 10)
-            humanoid.WalkSpeed = XZRBoosts.OriginalValues.WalkSpeed * speedMult
+        if CRAKCEDBoosts.CurrentValues.Speed > 0 then
+            local speedMult = 1 + (CRAKCEDBoosts.CurrentValues.Speed / 10)
+            humanoid.WalkSpeed = CRAKCEDBoosts.OriginalValues.WalkSpeed * speedMult
         else
-            humanoid.WalkSpeed = XZRBoosts.OriginalValues.WalkSpeed
+            humanoid.WalkSpeed = CRAKCEDBoosts.OriginalValues.WalkSpeed
         end
 
-        if XZRBoosts.CurrentValues.Jump > 0 then
-            local jumpMult = 1 + (XZRBoosts.CurrentValues.Jump / 10)
-            humanoid.JumpPower = XZRBoosts.OriginalValues.JumpPower * jumpMult
+        if CRAKCEDBoosts.CurrentValues.Jump > 0 then
+            local jumpMult = 1 + (CRAKCEDBoosts.CurrentValues.Jump / 10)
+            humanoid.JumpPower = CRAKCEDBoosts.OriginalValues.JumpPower * jumpMult
         else
-            humanoid.JumpPower = XZRBoosts.OriginalValues.JumpPower
+            humanoid.JumpPower = CRAKCEDBoosts.OriginalValues.JumpPower
         end
     else
-        workspace.Gravity = XZRBoosts.OriginalValues.Gravity
+        workspace.Gravity = CRAKCEDBoosts.OriginalValues.Gravity
         local humanoid = character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = XZRBoosts.OriginalValues.WalkSpeed
-            humanoid.JumpPower = XZRBoosts.OriginalValues.JumpPower
+            humanoid.WalkSpeed = CRAKCEDBoosts.OriginalValues.WalkSpeed
+            humanoid.JumpPower = CRAKCEDBoosts.OriginalValues.JumpPower
         end
     end
 end
 
 player.CharacterAdded:Connect(function()
     task.wait(1)
-    if XZRBoosts.Enabled then
+    if CRAKCEDBoosts.Enabled then
         applyBoosts()
     end
 end)
@@ -1642,7 +1642,7 @@ local function createMiniMap()
     end
 
     miniMapGui = Instance.new("ScreenGui")
-    miniMapGui.Name = "XZRMiniMapGui"
+    miniMapGui.Name = "CRAKCEDMiniMapGui"
     miniMapGui.Parent = player:WaitForChild("PlayerGui")
     miniMapGui.ResetOnSpawn = false
     miniMapGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -2068,15 +2068,15 @@ end
 -- EXTREME ENHANCED GRAPHICS FUNCTION
 local function EXTREME_ENHANCED_GRAPHICS()
     if lib then
-        lib:Notification("EXTREME GRAPHICS", "🟣 Loading XZR Hybrid Weather + Sky System...", 3)
+        lib:Notification("EXTREME GRAPHICS", "🟣 Loading CRAKCED Hybrid Weather + Sky System...", 3)
     else
-        showNotification("EXTREME GRAPHICS", "🟣 Loading XZR Hybrid Weather + Sky System...", 3)
+        showNotification("EXTREME GRAPHICS", "🟣 Loading CRAKCED Hybrid Weather + Sky System...", 3)
     end
     
-    -- Load the XZR HYBRID WEATHER + SKY SYSTEM
+    -- Load the CRAKCED HYBRID WEATHER + SKY SYSTEM
     local success, error = pcall(function()
         --[[
-            XZR HYBRID WEATHER + SKY SYSTEM
+            CRAKCED HYBRID WEATHER + SKY SYSTEM
             --------------------------------
             Features:
             - AAA Sun/Moon system
@@ -2420,16 +2420,16 @@ local function EXTREME_ENHANCED_GRAPHICS()
             end
         end)
 
-        print("🌦️ XZR FULL HYBRID WEATHER SYSTEM WITH NON-OVERLAPPING CLOUDS LOADED")
+        print("🌦️ CRAKCED FULL HYBRID WEATHER SYSTEM WITH NON-OVERLAPPING CLOUDS LOADED")
     end)
     
     if success then
         GraphicsSettings.EnhancedGraphics = "Extreme"
         saveAllSettings()
         if lib then
-            lib:Notification("EXTREME GRAPHICS", "🟣 XZR HYBRID WEATHER + SKY SYSTEM ACTIVATED!", 5)
+            lib:Notification("EXTREME GRAPHICS", "🟣 CRAKCED HYBRID WEATHER + SKY SYSTEM ACTIVATED!", 5)
         else
-            showNotification("EXTREME GRAPHICS", "🟣 XZR HYBRID WEATHER + SKY SYSTEM ACTIVATED!", 5)
+            showNotification("EXTREME GRAPHICS", "🟣 CRAKCED HYBRID WEATHER + SKY SYSTEM ACTIVATED!", 5)
         end
     else
         if lib then
@@ -2477,8 +2477,8 @@ local function applyGraphicsSettings()
     end
     
     -- Apply fullbright
-    if Lighting:FindFirstChild("XZRFullbright") then
-        Lighting.XZRFullbright:Destroy()
+    if Lighting:FindFirstChild("CRAKCEDFullbright") then
+        Lighting.CRAKCEDFullbright:Destroy()
     end
     
     if GraphicsSettings.Fullbright then
@@ -2489,7 +2489,7 @@ local function applyGraphicsSettings()
         Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
         
         local fullbright = Instance.new("ColorCorrectionEffect")
-        fullbright.Name = "XZRFullbright"
+        fullbright.Name = "CRAKCEDFullbright"
         fullbright.Brightness = 0.3
         fullbright.Contrast = 0.1
         fullbright.Saturation = 0.1
@@ -2534,7 +2534,7 @@ end
 local fpsCounter = nil
 local function createFPSCounter()
     local fpsGui = Instance.new("ScreenGui")
-    fpsGui.Name = "XZRFPSCounter"
+    fpsGui.Name = "CRAKCEDFPSCounter"
     fpsGui.Parent = player.PlayerGui
     fpsGui.ResetOnSpawn = false
     fpsGui.DisplayOrder = 999
@@ -2734,7 +2734,7 @@ end
 
 -- BRAINROT SPAWNER Function
 local function startBrainrotSpawner()
-    -- Close XZR HUB menu when Brainrot Spawner is activated
+    -- Close CRAKCED HUB menu when Brainrot Spawner is activated
     if mainMenu then
         mainMenu.Enabled = false
     end
@@ -2829,7 +2829,7 @@ local function copyServerLink()
     end
 end
 
--- SETTINGS FULLSCREEN PAGE FUNCTION WITH XZR-STYLE BUTTONS AND ENHANCED GRAPHICS
+-- SETTINGS FULLSCREEN PAGE FUNCTION WITH CRAKCED-STYLE BUTTONS AND ENHANCED GRAPHICS
 local function openSettingsPage()
     local playerGui = player:WaitForChild("PlayerGui")
 
@@ -2839,12 +2839,12 @@ local function openSettingsPage()
     end
 
     -- Destroy if already open
-    if playerGui:FindFirstChild("XZRSettingsPage") then
-        playerGui.XZRSettingsPage:Destroy()
+    if playerGui:FindFirstChild("CRAKCEDSettingsPage") then
+        playerGui.CRAKCEDSettingsPage:Destroy()
     end
 
     local settingsGui = Instance.new("ScreenGui")
-    settingsGui.Name = "XZRSettingsPage"
+    settingsGui.Name = "CRAKCEDSettingsPage"
     settingsGui.Parent = playerGui
     settingsGui.ResetOnSpawn = false
     settingsGui.IgnoreGuiInset = true
@@ -2923,8 +2923,8 @@ local function openSettingsPage()
     settingsContainer.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
     settingsContainer.Parent = rightPanel
 
-    -- Function to create XZR-style buttons
-    local function createXZRButton(text, position, callback, isToggle, initialState)
+    -- Function to create CRAKCED-style buttons
+    local function createCRAKCEDButton(text, position, callback, isToggle, initialState)
         local button = Instance.new("TextButton")
         button.Text = text
         button.Font = Enum.Font.Gotham
@@ -3004,7 +3004,7 @@ local function openSettingsPage()
     guiSection.Parent = settingsContainer
 
     -- Hide Watermark Toggle
-    createXZRButton("Hide Watermark", UDim2.new(0.05, 0, 0, 30), function(state)
+    createCRAKCEDButton("Hide Watermark", UDim2.new(0.05, 0, 0, 30), function(state)
         GuiSettings.HideWatermark = state
         if lib and lib.Watermark then
             lib.Watermark.Visible = not state
@@ -3024,7 +3024,7 @@ local function openSettingsPage()
     notifDurationLabel.Position = UDim2.new(0.05, 0, 0, 75)
     notifDurationLabel.Parent = settingsContainer
 
-    createXZRButton("Adjust Duration", UDim2.new(0.05, 0, 0, 105), function()
+    createCRAKCEDButton("Adjust Duration", UDim2.new(0.05, 0, 0, 105), function()
         GuiSettings.NotificationDuration = GuiSettings.NotificationDuration + 1
         if GuiSettings.NotificationDuration > 10 then
             GuiSettings.NotificationDuration = 1
@@ -3035,14 +3035,14 @@ local function openSettingsPage()
     end, false)
 
     -- Auto Save Toggle
-    createXZRButton("Auto-Save Settings", UDim2.new(0.05, 0, 0, 150), function(state)
+    createCRAKCEDButton("Auto-Save Settings", UDim2.new(0.05, 0, 0, 150), function(state)
         GuiSettings.AutoSaveSettings = state
         saveAllSettings()
         showNotification("Settings", state and "✅ Auto-save enabled" or "❌ Auto-save disabled", 2)
     end, true, GuiSettings.AutoSaveSettings)
 
     -- Welcome Message Toggle
-    createXZRButton("Welcome Message", UDim2.new(0.05, 0, 0, 195), function(state)
+    createCRAKCEDButton("Welcome Message", UDim2.new(0.05, 0, 0, 195), function(state)
         GuiSettings.ShowWelcomeMessage = state
         saveAllSettings()
         showNotification("Settings", state and "✅ Welcome message enabled" or "❌ Welcome message disabled", 2)
@@ -3078,7 +3078,7 @@ local function openSettingsPage()
     end
     themeLabel.Text = "Theme Color: " .. currentColorName
 
-    createXZRButton("Change Theme", UDim2.new(0.05, 0, 0, 270), function()
+    createCRAKCEDButton("Change Theme", UDim2.new(0.05, 0, 0, 270), function()
         local colors = {
             Color3.fromRGB(0, 170, 255),   -- Blue
             Color3.fromRGB(0, 255, 0),     -- Green
@@ -3135,7 +3135,7 @@ local function openSettingsPage()
     enhancedGraphicsLabel.Parent = settingsContainer
 
     -- Enhanced Graphics Buttons (only one can be active at a time)
-    createXZRButton("🟢 LOW ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 375), function()
+    createCRAKCEDButton("🟢 LOW ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 375), function()
         -- Disable any currently active enhanced graphics first
         if GraphicsSettings.EnhancedGraphics ~= "None" then
             DISABLE_ENHANCED_GRAPHICS()
@@ -3145,7 +3145,7 @@ local function openSettingsPage()
         showNotification("Enhanced Graphics", "🟢 LOW ENHANCED GRAPHICS Enabled", 3)
     end, false)
 
-    createXZRButton("🟡 MEDIUM ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 420), function()
+    createCRAKCEDButton("🟡 MEDIUM ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 420), function()
         -- Disable any currently active enhanced graphics first
         if GraphicsSettings.EnhancedGraphics ~= "None" then
             DISABLE_ENHANCED_GRAPHICS()
@@ -3155,7 +3155,7 @@ local function openSettingsPage()
         showNotification("Enhanced Graphics", "🟡 MEDIUM ENHANCED GRAPHICS Enabled", 3)
     end, false)
 
-    createXZRButton("🔴 HIGH ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 465), function()
+    createCRAKCEDButton("🔴 HIGH ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 465), function()
         -- Disable any currently active enhanced graphics first
         if GraphicsSettings.EnhancedGraphics ~= "None" then
             DISABLE_ENHANCED_GRAPHICS()
@@ -3166,7 +3166,7 @@ local function openSettingsPage()
     end, false)
 
     -- EXTREME ENHANCED GRAPHICS Button (Updated to purple)
-    createXZRButton("🟣 EXTREME ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 510), function()
+    createCRAKCEDButton("🟣 EXTREME ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 510), function()
         -- Disable any currently active enhanced graphics first
         if GraphicsSettings.EnhancedGraphics ~= "None" then
             DISABLE_ENHANCED_GRAPHICS()
@@ -3175,7 +3175,7 @@ local function openSettingsPage()
         enhancedGraphicsLabel.Text = "Enhanced Graphics: Extreme"
     end, false)
 
-    createXZRButton("❌ DISABLE ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 555), function()
+    createCRAKCEDButton("❌ DISABLE ENHANCED GRAPHICS", UDim2.new(0.05, 0, 0, 555), function()
         DISABLE_ENHANCED_GRAPHICS()
         enhancedGraphicsLabel.Text = "Enhanced Graphics: None"
         showNotification("Enhanced Graphics", "❌ ENHANCED GRAPHICS Disabled", 3)
@@ -3203,34 +3203,34 @@ local function openSettingsPage()
     qualityLabel.Position = UDim2.new(0.05, 0, 0, 630)
     qualityLabel.Parent = settingsContainer
 
-    createXZRButton("Decrease Quality", UDim2.new(0.05, 0, 0, 660), function()
+    createCRAKCEDButton("Decrease Quality", UDim2.new(0.05, 0, 0, 660), function()
         GraphicsSettings.QualityLevel = math.max(1, GraphicsSettings.QualityLevel - 1)
         qualityLabel.Text = "Graphics Quality: " .. GraphicsSettings.QualityLevel .. "/10"
         applyGraphicsSettings()
     end, false)
 
-    createXZRButton("Increase Quality", UDim2.new(0.05, 0, 0, 705), function()
+    createCRAKCEDButton("Increase Quality", UDim2.new(0.05, 0, 0, 705), function()
         GraphicsSettings.QualityLevel = math.min(10, GraphicsSettings.QualityLevel + 1)
         qualityLabel.Text = "Graphics Quality: " .. GraphicsSettings.QualityLevel .. "/10"
         applyGraphicsSettings()
     end, false)
 
     -- Shadows Toggle
-    createXZRButton("Shadows", UDim2.new(0.05, 0, 0, 750), function(state)
+    createCRAKCEDButton("Shadows", UDim2.new(0.05, 0, 0, 750), function(state)
         GraphicsSettings.Shadows = state
         applyGraphicsSettings()
         showNotification("Graphics", state and "✅ Shadows enabled" or "❌ Shadows disabled", 2)
     end, true, GraphicsSettings.Shadows)
 
     -- Anti-Aliasing Toggle
-    createXZRButton("Anti-Aliasing", UDim2.new(0.05, 0, 0, 795), function(state)
+    createCRAKCEDButton("Anti-Aliasing", UDim2.new(0.05, 0, 0, 795), function(state)
         GraphicsSettings.AntiAliasing = state
         applyGraphicsSettings()
         showNotification("Graphics", state and "✅ Anti-Aliasing enabled" or "❌ Anti-Aliasing disabled", 2)
     end, true, GraphicsSettings.AntiAliasing)
 
     -- Fullbright Toggle
-    createXZRButton("Fullbright", UDim2.new(0.05, 0, 0, 840), function(state)
+    createCRAKCEDButton("Fullbright", UDim2.new(0.05, 0, 0, 840), function(state)
         GraphicsSettings.Fullbright = state
         applyGraphicsSettings()
         showNotification("Graphics", state and "✅ Fullbright enabled" or "❌ Fullbright disabled", 2)
@@ -3247,7 +3247,7 @@ local function openSettingsPage()
     fpsLabel.Position = UDim2.new(0.05, 0, 0, 885)
     fpsLabel.Parent = settingsContainer
 
-    createXZRButton("Adjust FPS Limit", UDim2.new(0.05, 0, 0, 915), function()
+    createCRAKCEDButton("Adjust FPS Limit", UDim2.new(0.05, 0, 0, 915), function()
         local fpsOptions = {0, 30, 60, 120, 144, 240}
         local currentIndex = 1
         for i, fps in ipairs(fpsOptions) do
@@ -3265,7 +3265,7 @@ local function openSettingsPage()
     end, false)
 
     -- VSync Toggle
-    createXZRButton("VSync", UDim2.new(0.05, 0, 0, 960), function(state)
+    createCRAKCEDButton("VSync", UDim2.new(0.05, 0, 0, 960), function(state)
         GraphicsSettings.VSync = state
         applyGraphicsSettings()
         showNotification("Graphics", state and "✅ VSync enabled" or "❌ VSync disabled", 2)
@@ -3282,14 +3282,14 @@ local function openSettingsPage()
     renderLabel.Position = UDim2.new(0.05, 0, 0, 1005)
     renderLabel.Parent = settingsContainer
 
-    createXZRButton("Decrease Render Distance", UDim2.new(0.05, 0, 0, 1035), function()
+    createCRAKCEDButton("Decrease Render Distance", UDim2.new(0.05, 0, 0, 1035), function()
         GraphicsSettings.RenderDistance = math.max(100, GraphicsSettings.RenderDistance - 100)
         renderLabel.Text = "Render Distance: " .. GraphicsSettings.RenderDistance
         applyGraphicsSettings()
         showNotification("Graphics", "Render Distance: " .. GraphicsSettings.RenderDistance, 2)
     end, false)
 
-    createXZRButton("Increase Render Distance", UDim2.new(0.05, 0, 0, 1080), function()
+    createCRAKCEDButton("Increase Render Distance", UDim2.new(0.05, 0, 0, 1080), function()
         GraphicsSettings.RenderDistance = math.min(2000, GraphicsSettings.RenderDistance + 100)
         renderLabel.Text = "Render Distance: " .. GraphicsSettings.RenderDistance
         applyGraphicsSettings()
@@ -3307,7 +3307,7 @@ local function openSettingsPage()
     particleLabel.Position = UDim2.new(0.05, 0, 0, 1125)
     particleLabel.Parent = settingsContainer
 
-    createXZRButton("Change Particle Quality", UDim2.new(0.05, 0, 0, 1155), function()
+    createCRAKCEDButton("Change Particle Quality", UDim2.new(0.05, 0, 0, 1155), function()
         local qualities = {"Low", "Medium", "High"}
         local currentIndex = 1
         for i, quality in ipairs(qualities) do
@@ -3325,7 +3325,7 @@ local function openSettingsPage()
     end, false)
 
     -- FPS Counter Toggle
-    createXZRButton("Show FPS Counter", UDim2.new(0.05, 0, 0, 1200), function(state)
+    createCRAKCEDButton("Show FPS Counter", UDim2.new(0.05, 0, 0, 1200), function(state)
         if state then
             if not fpsCounter then
                 fpsCounter = createFPSCounter()
@@ -3341,7 +3341,7 @@ local function openSettingsPage()
     end, true, false)
 
     -- Performance Presets
-    createXZRButton("🎯 PERFORMANCE MODE (Low)", UDim2.new(0.05, 0, 0, 1245), function()
+    createCRAKCEDButton("🎯 PERFORMANCE MODE (Low)", UDim2.new(0.05, 0, 0, 1245), function()
         GraphicsSettings.QualityLevel = 1
         GraphicsSettings.Shadows = false
         GraphicsSettings.AntiAliasing = false
@@ -3359,7 +3359,7 @@ local function openSettingsPage()
         showNotification("Graphics", "🎯 PERFORMANCE MODE ACTIVATED!", 3)
     end, false)
 
-    createXZRButton("🌟 QUALITY MODE (High)", UDim2.new(0.05, 0, 0, 1290), function()
+    createCRAKCEDButton("🌟 QUALITY MODE (High)", UDim2.new(0.05, 0, 0, 1290), function()
         GraphicsSettings.QualityLevel = 8
         GraphicsSettings.Shadows = true
         GraphicsSettings.AntiAliasing = true
@@ -3389,9 +3389,9 @@ local function openSettingsPage()
     systemSection.Parent = settingsContainer
 
     -- Export Settings Button
-    createXZRButton("Export Settings", UDim2.new(0.05, 0, 0, 1365), function()
+    createCRAKCEDButton("Export Settings", UDim2.new(0.05, 0, 0, 1365), function()
         if setclipboard then
-            local settingsString = "XZR HUB Settings:\n"
+            local settingsString = "CRAKCED HUB Settings:\n"
             settingsString = settingsString .. "Theme: " .. tostring(GuiSettings.ThemeColor) .. "\n"
             settingsString = settingsString .. "Hide Watermark: " .. tostring(GuiSettings.HideWatermark) .. "\n"
             settingsString = settingsString .. "Notification Duration: " .. GuiSettings.NotificationDuration .. "s\n"
@@ -3405,7 +3405,7 @@ local function openSettingsPage()
     end, false)
 
     -- Reset Settings Button
-    createXZRButton("Reset All Settings", UDim2.new(0.05, 0, 0, 1410), function()
+    createCRAKCEDButton("Reset All Settings", UDim2.new(0.05, 0, 0, 1410), function()
         GuiSettings = {
             ThemeColor = Color3.fromRGB(0, 170, 255),
             BackgroundTransparency = 0.1,
@@ -3444,7 +3444,7 @@ local function openSettingsPage()
     end, false)
 
     -- Reload Menu Button
-    createXZRButton("Reload Menu", UDim2.new(0.05, 0, 0, 1455), function()
+    createCRAKCEDButton("Reload Menu", UDim2.new(0.05, 0, 0, 1455), function()
         showNotification("Settings", "🔄 Reloading menu...", 2)
         task.wait(1)
         settingsGui:Destroy()
@@ -3457,7 +3457,7 @@ local function openSettingsPage()
     -- Update container size for new content
     settingsContainer.CanvasSize = UDim2.new(0, 0, 0, 1550)
 
-    -- XZR-style Close Button (Moved to bottom right)
+    -- CRAKCED-style Close Button (Moved to bottom right)
     local closeButton = Instance.new("TextButton")
     closeButton.Text = "CLOSE"
     closeButton.Font = Enum.Font.GothamBold
@@ -3498,7 +3498,7 @@ local function openSettingsPage()
         tween.Completed:Wait()
 
         settingsGui:Destroy()
-        -- Reopen XZR HUB menu when settings closes
+        -- Reopen CRAKCED HUB menu when settings closes
         if mainMenu then
             mainMenu.Enabled = true
         end
@@ -3511,7 +3511,7 @@ local function cleanupExistingMenus()
         local playerGui = player:FindFirstChild("PlayerGui")
         if playerGui then
             for _, gui in pairs(playerGui:GetChildren()) do
-                if gui:IsA("ScreenGui") and (gui.Name:find("XZR") or gui.Name:find("Main") or gui.Name:find("Library")) then
+                if gui:IsA("ScreenGui") and (gui.Name:find("CRAKCED") or gui.Name:find("Main") or gui.Name:find("Library")) then
                     gui:Destroy()
                 end
             end
@@ -3568,7 +3568,7 @@ local function loadMainMenu()
     lib = loadedLib
 
     local main = lib:Load({
-        Title = "Steal a Brainrot 〢 XZR HUB",
+        Title = "Steal a Brainrot 〢 CRAKCED HUB",
         ToggleButton = "rbxassetid://105059922903197",
         BindGui = Enum.KeyCode.RightControl,
     })
@@ -3582,7 +3582,7 @@ local function loadMainMenu()
     local tabs = {
         Home = main:AddTab("Home"),
         General = main:AddTab("General"),
-        Boosts = main:AddTab("XZR BOOSTS"),
+        Boosts = main:AddTab("CRAKCED BOOSTS"),
         Visual = main:AddTab("Visual"),
         Character = main:AddTab("Character"),
         Brainrot = main:AddTab("BRAINROT SPAWNER ⚠️NOT OWNED⚠️"),
@@ -3595,13 +3595,13 @@ local function loadMainMenu()
         Welcome = tabs.Home:AddSection({Defualt = true, Locked = true}),
         Discord = tabs.Home:AddSection({Defualt = true, Locked = true}),
         DeliverySteal = tabs.General:AddSection({Title = "DELIVERY STEAL System", Description = "Checkpoint-based teleportation", Defualt = false, Locked = false}),
-        XZRPlatform = tabs.General:AddSection({Title = "XZR PLATFORM (STANDARD)", Description = "Personal floating platform with controls", Defualt = false, Locked = false}),
-        BoostMain = tabs.Boosts:AddSection({Title = "XZR BOOSTS", Description = "Enhanced character boosts", Defualt = false, Locked = false}),
-        BoostSettings = tabs.Boosts:AddSection({Title = "XZR BOOST SETTINGS", Description = "Customize your boosts", Defualt = false, Locked = false}),
+        CRAKCEDPlatform = tabs.General:AddSection({Title = "CRAKCED PLATFORM (STANDARD)", Description = "Personal floating platform with controls", Defualt = false, Locked = false}),
+        BoostMain = tabs.Boosts:AddSection({Title = "CRAKCED BOOSTS", Description = "Enhanced character boosts", Defualt = false, Locked = false}),
+        BoostSettings = tabs.Boosts:AddSection({Title = "CRAKCED BOOST SETTINGS", Description = "Customize your boosts", Defualt = false, Locked = false}),
         VisualMain = tabs.Visual:AddSection({Title = "Visual Features", Description = "ESP, Mini Map, and visual enhancements", Defualt = false, Locked = false}),
         Character = tabs.Character:AddSection({Title = "Character Controls", Description = "Character manipulation and movement", Defualt = false, Locked = false}),
         Desync = tabs.Character:AddSection({Title = "DESYNC SYSTEM", Description = "Activate external desync script", Defualt = false, Locked = false}),
-        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY XZR HUB⚠️", Defualt = false, Locked = false}),
+        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY CRAKCED HUB⚠️", Defualt = false, Locked = false}),
         PrivateServerMain = tabs.PrivateServer:AddSection({Title = "PRIVATE SERVER ⚠️PATCHED⚠️", Description = "Private server system currently patched", Defualt = false, Locked = false}),
         BrainrotFinderMain = tabs.BrainrotFinder:AddSection({Title = "BRAINROT FINDER", Description = "Find and track specific brainrot players", Defualt = false, Locked = false}),
         SettingsMain = tabs.Settings:AddSection({Title = "SETTINGS", Description = "Open full settings panel", Defualt = false, Locked = false})
@@ -3621,8 +3621,8 @@ local function loadMainMenu()
     })
 
     Sections.Welcome:AddParagraph({
-        Title = "Welcome to XZR HUB!",
-        Description = "👋 Welcome to XZR Hub!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
+        Title = "Welcome to CRAKCED HUB!",
+        Description = "👋 Welcome to CRAKCED Hub!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
     })
 
     -- DELIVERY STEAL Section
@@ -3662,24 +3662,24 @@ local function loadMainMenu()
         end
     })
 
-    -- XZR PLATFORM Section (ADDED TO GENERAL)
-    Sections.XZRPlatform:AddToggle("XZRPlatformToggle", {
-        Title = "XZR PLATFORM (STANDARD)",
+    -- CRAKCED PLATFORM Section (ADDED TO GENERAL)
+    Sections.CRAKCEDPlatform:AddToggle("CRAKCEDPlatformToggle", {
+        Title = "CRAKCED PLATFORM (STANDARD)",
         Description = "Personal floating platform with up/down controls",
         Default = false,
         Callback = function(value)
-            toggleXZRPlatform(value)
+            toggleCRAKCEDPlatform(value)
         end
     })
 
-    Sections.XZRPlatform:AddParagraph({
-        Title = "XZR PLATFORM FEATURES:",
+    Sections.CRAKCEDPlatform:AddParagraph({
+        Title = "CRAKCED PLATFORM FEATURES:",
         Description = [[
 • 🏗️ Personal floating platform that follows you
 • ⬆️⬇️ Up/Down buttons to adjust platform height
 • 🎯 Smooth movement with tween animations
 • 🔒 Platform stays beneath you automatically
-• 🎨 Professional XZR branding with glow effects
+• 🎨 Professional CRAKCED branding with glow effects
 • 🎮 Easy to use with simple controls
 
 CONTROLS:
@@ -3723,18 +3723,18 @@ CONTROLS:
 ]]
     })
 
-    -- XZR BOOSTS Section
-    Sections.BoostMain:AddToggle("XZRBoostsToggle", {
-        Title = "XZR BOOSTS MASTER TOGGLE",
+    -- CRAKCED BOOSTS Section
+    Sections.BoostMain:AddToggle("CRAKCEDBoostsToggle", {
+        Title = "CRAKCED BOOSTS MASTER TOGGLE",
         Description = "Enable/Disable all boosts at once",
         Default = false,
         Callback = function(value)
-            XZRBoosts.Enabled = value
+            CRAKCEDBoosts.Enabled = value
             applyBoosts()
             if value then
-                lib:Notification("XZR BOOSTS", "✅ BOOSTS ACTIVATED!", 3)
+                lib:Notification("CRAKCED BOOSTS", "✅ BOOSTS ACTIVATED!", 3)
             else
-                lib:Notification("XZR BOOSTS", "❌ BOOSTS DISABLED", 3)
+                lib:Notification("CRAKCED BOOSTS", "❌ BOOSTS DISABLED", 3)
             end
         end
     })
@@ -3747,8 +3747,8 @@ CONTROLS:
         Max = 100,
         Rounding = 0,
         Callback = function(value)
-            XZRBoosts.CurrentValues.Gravity = value
-            if XZRBoosts.Enabled then
+            CRAKCEDBoosts.CurrentValues.Gravity = value
+            if CRAKCEDBoosts.Enabled then
                 applyBoosts()
                 lib:Notification("Gravity", "🌀 Gravity: " .. value, 2)
             end
@@ -3763,8 +3763,8 @@ CONTROLS:
         Max = 100,
         Rounding = 0,
         Callback = function(value)
-            XZRBoosts.CurrentValues.Speed = value
-            if XZRBoosts.Enabled then
+            CRAKCEDBoosts.CurrentValues.Speed = value
+            if CRAKCEDBoosts.Enabled then
                 applyBoosts()
                 lib:Notification("Speed", "⚡ Speed: " .. value, 2)
             end
@@ -3779,8 +3779,8 @@ CONTROLS:
         Max = 100,
         Rounding = 0,
         Callback = function(value)
-            XZRBoosts.CurrentValues.Jump = value
-            if XZRBoosts.Enabled then
+            CRAKCEDBoosts.CurrentValues.Jump = value
+            if CRAKCEDBoosts.Enabled then
                 applyBoosts()
                 lib:Notification("Jump", "🦘 Jump: " .. value, 2)
             end
@@ -3869,7 +3869,7 @@ CONTROLS:
     -- BRAINROT SPAWNER Section
     Sections.BrainrotSpawner:AddButton({
         Title = "🚀 START BRAINROT SPAWNER",
-        Description = "Load external Brainrot scripts - NOT OWNED BY XZR HUB",
+        Description = "Load external Brainrot scripts - NOT OWNED BY CRAKCED HUB",
         Callback = function()
             startBrainrotSpawner()
         end
@@ -3880,7 +3880,7 @@ CONTROLS:
         Description = [[
 This feature loads external scripts from third-party sources.
 
-• NOT developed or owned by XZR HUB
+• NOT developed or owned by CRAKCED HUB
 • Use at your own risk
 • No support provided for external scripts
 • May be detected by anti-cheat systems
@@ -4037,7 +4037,7 @@ NOTE: Uses external BrainrotFinder script
     menuLoadInProgress = false
     
     if GuiSettings.ShowWelcomeMessage then
-        lib:Notification('XZR HUB', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
+        lib:Notification('CRAKCED HUB', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
     end
     
     return true
@@ -4052,9 +4052,9 @@ local function toggleMenu()
     if mainMenu then
         mainMenu.Enabled = not mainMenu.Enabled
         if mainMenu.Enabled then
-            showNotification("XZR HUB", "Menu shown - Press RightControl to hide", 3)
+            showNotification("CRAKCED HUB", "Menu shown - Press RightControl to hide", 3)
         else
-            showNotification("XZR HUB", "Menu hidden - Press RightControl to show", 3)
+            showNotification("CRAKCED HUB", "Menu hidden - Press RightControl to show", 3)
         end
     else
         loadMainMenu()
@@ -4099,9 +4099,9 @@ local function cleanup()
     -- Cleanup brainrot ESP
     toggleBrainrotESP(false)
     
-    -- Cleanup XZR Platform
-    if XZRPlatformEnabled then
-        toggleXZRPlatform(false)
+    -- Cleanup CRAKCED Platform
+    if CRAKCEDPlatformEnabled then
+        toggleCRAKCEDPlatform(false)
     end
     
     -- Cleanup Wall Climb
@@ -4122,11 +4122,11 @@ keybindConnection = UserInputService.InputBegan:Connect(function(input, gameProc
 end)
 
 -- Main execution - FIXED INTRO TIMING
-showXZRIntro(function()
+showCRAKCEDIntro(function()
     loadAllSettings()
     
-    -- Create XZR HUB label in the middle of the screen
-    createXZRHubCenterLabel()
+    -- Create CRAKCED HUB label in the middle of the screen
+    createCRAKCEDHubCenterLabel()
     
     -- ✅ Auto-load menu after teleport if flag is set
     local tpData = TeleportService:GetLocalPlayerTeleportData()
@@ -4139,7 +4139,7 @@ showXZRIntro(function()
     end
     
     task.delay(2, function()
-        showNotification("XZR HUB", "Loaded successfully! Press RightControl to toggle menu", 5)
+        showNotification("CRAKCED HUB", "Loaded successfully! Press RightControl to toggle menu", 5)
     end)
 end)
 
@@ -4156,7 +4156,7 @@ end)
 
 -- Boost application loop
 RunService.RenderStepped:Connect(function()
-    if XZRBoosts.Enabled then
+    if CRAKCEDBoosts.Enabled then
         applyBoosts()
     end
 end)
