@@ -1,5 +1,5 @@
 
--- CRAKCED HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
+-- JQ - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -311,7 +311,7 @@ local stopClimb = false
 local playerSpawnPosition = Vector3.new(0, 25, 0)
 local checkpointPosition = Vector3.new(0, 25, 0)
 
--- Function to create CRAKCED HUB center label
+-- Function to create JQ center label
 local function createCRAKCEDHubCenterLabel()
     -- Services
     local Players = game:GetService("Players")
@@ -330,7 +330,7 @@ local function createCRAKCEDHubCenterLabel()
     label.Position = UDim2.new(0.5, 0, 0.5, 0)
     label.AnchorPoint = Vector2.new(0.5, 0.5)
     label.BackgroundTransparency = 1
-    label.Text = "CRAKCED HUB"
+    label.Text = "JQ"
     label.TextColor3 = Color3.fromRGB(0, 0, 0)
     label.TextScaled = true
     label.Font = Enum.Font.GothamBold
@@ -725,7 +725,7 @@ local function showCRAKCEDIntro(callback)
     local logo = Instance.new("TextLabel", gui)
     logo.Size = UDim2.fromScale(1,1)
     logo.BackgroundTransparency = 1
-    logo.Text = "CRAKCED HUB"
+    logo.Text = "JQ"
     logo.TextColor3 = Color3.new(0,0,0)
     logo.Font = Enum.Font.GothamBlack
     logo.TextScaled = true
@@ -2734,7 +2734,7 @@ end
 
 -- BRAINROT SPAWNER Function
 local function startBrainrotSpawner()
-    -- Close CRAKCED HUB menu when Brainrot Spawner is activated
+    -- Close JQ menu when Brainrot Spawner is activated
     if mainMenu then
         mainMenu.Enabled = false
     end
@@ -3391,7 +3391,7 @@ local function openSettingsPage()
     -- Export Settings Button
     createCRAKCEDButton("Export Settings", UDim2.new(0.05, 0, 0, 1365), function()
         if setclipboard then
-            local settingsString = "CRAKCED HUB Settings:\n"
+            local settingsString = "JQ Settings:\n"
             settingsString = settingsString .. "Theme: " .. tostring(GuiSettings.ThemeColor) .. "\n"
             settingsString = settingsString .. "Hide Watermark: " .. tostring(GuiSettings.HideWatermark) .. "\n"
             settingsString = settingsString .. "Notification Duration: " .. GuiSettings.NotificationDuration .. "s\n"
@@ -3498,7 +3498,7 @@ local function openSettingsPage()
         tween.Completed:Wait()
 
         settingsGui:Destroy()
-        -- Reopen CRAKCED HUB menu when settings closes
+        -- Reopen JQ menu when settings closes
         if mainMenu then
             mainMenu.Enabled = true
         end
@@ -3568,7 +3568,7 @@ local function loadMainMenu()
     lib = loadedLib
 
     local main = lib:Load({
-        Title = "Steal a Brainrot 〢 CRAKCED HUB",
+        Title = "Steal a Brainrot 〢 JQ",
         ToggleButton = "rbxassetid://105059922903197",
         BindGui = Enum.KeyCode.RightControl,
     })
@@ -3601,7 +3601,7 @@ local function loadMainMenu()
         VisualMain = tabs.Visual:AddSection({Title = "Visual Features", Description = "ESP, Mini Map, and visual enhancements", Defualt = false, Locked = false}),
         Character = tabs.Character:AddSection({Title = "Character Controls", Description = "Character manipulation and movement", Defualt = false, Locked = false}),
         Desync = tabs.Character:AddSection({Title = "DESYNC SYSTEM", Description = "Activate external desync script", Defualt = false, Locked = false}),
-        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY CRAKCED HUB⚠️", Defualt = false, Locked = false}),
+        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY JQ⚠️", Defualt = false, Locked = false}),
         PrivateServerMain = tabs.PrivateServer:AddSection({Title = "PRIVATE SERVER ⚠️PATCHED⚠️", Description = "Private server system currently patched", Defualt = false, Locked = false}),
         BrainrotFinderMain = tabs.BrainrotFinder:AddSection({Title = "BRAINROT FINDER", Description = "Find and track specific brainrot players", Defualt = false, Locked = false}),
         SettingsMain = tabs.Settings:AddSection({Title = "SETTINGS", Description = "Open full settings panel", Defualt = false, Locked = false})
@@ -3621,8 +3621,8 @@ local function loadMainMenu()
     })
 
     Sections.Welcome:AddParagraph({
-        Title = "Welcome to CRAKCED HUB!",
-        Description = "👋 Welcome to CRAKCED Hub!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
+        Title = "Welcome to JQ!",
+        Description = "👋 Welcome to JQ!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
     })
 
     -- DELIVERY STEAL Section
@@ -3869,7 +3869,7 @@ CONTROLS:
     -- BRAINROT SPAWNER Section
     Sections.BrainrotSpawner:AddButton({
         Title = "🚀 START BRAINROT SPAWNER",
-        Description = "Load external Brainrot scripts - NOT OWNED BY CRAKCED HUB",
+        Description = "Load external Brainrot scripts - NOT OWNED BY JQ",
         Callback = function()
             startBrainrotSpawner()
         end
@@ -3880,7 +3880,7 @@ CONTROLS:
         Description = [[
 This feature loads external scripts from third-party sources.
 
-• NOT developed or owned by CRAKCED HUB
+• NOT developed or owned by JQ
 • Use at your own risk
 • No support provided for external scripts
 • May be detected by anti-cheat systems
@@ -4037,7 +4037,7 @@ NOTE: Uses external BrainrotFinder script
     menuLoadInProgress = false
     
     if GuiSettings.ShowWelcomeMessage then
-        lib:Notification('CRAKCED HUB', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
+        lib:Notification('JQ', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
     end
     
     return true
@@ -4052,9 +4052,9 @@ local function toggleMenu()
     if mainMenu then
         mainMenu.Enabled = not mainMenu.Enabled
         if mainMenu.Enabled then
-            showNotification("CRAKCED HUB", "Menu shown - Press RightControl to hide", 3)
+            showNotification("JQ", "Menu shown - Press RightControl to hide", 3)
         else
-            showNotification("CRAKCED HUB", "Menu hidden - Press RightControl to show", 3)
+            showNotification("JQ", "Menu hidden - Press RightControl to show", 3)
         end
     else
         loadMainMenu()
@@ -4125,7 +4125,7 @@ end)
 showCRAKCEDIntro(function()
     loadAllSettings()
     
-    -- Create CRAKCED HUB label in the middle of the screen
+    -- Create JQ label in the middle of the screen
     createCRAKCEDHubCenterLabel()
     
     -- ✅ Auto-load menu after teleport if flag is set
@@ -4139,7 +4139,7 @@ showCRAKCEDIntro(function()
     end
     
     task.delay(2, function()
-        showNotification("CRAKCED HUB", "Loaded successfully! Press RightControl to toggle menu", 5)
+        showNotification("JQ", "Loaded successfully! Press RightControl to toggle menu", 5)
     end)
 end)
 
