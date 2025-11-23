@@ -280,6 +280,22 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 
+-- Minimal "player ESP" example
+local function drawESP()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = plr.Character.HumanoidRootPart
+            local screenPos, visible = Camera:WorldToViewportPoint(hrp.Position)
+            if visible then
+                print(plr.Name .. " is visible at screen position:", screenPos.X, screenPos.Y)
+            end
+        end
+    end
+end
+
+RunService.RenderStepped:Connect(drawESP)
+
+
 -- MAIN GUI (replace with your main GUI name)
 local MainGUI = game.CoreGui:FindFirstChild("MyMainGUI")
 if not MainGUI then
