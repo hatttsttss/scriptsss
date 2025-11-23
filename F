@@ -1,0 +1,597 @@
+-- Theme Colors
+local BLACK = Color3.fromRGB(15, 15, 15)
+local DARK_GRAY = Color3.fromRGB(35, 35, 35)
+local WHITE = Color3.fromRGB(255, 255, 255)
+local RED = Color3.fromRGB(200, 50, 50)
+local LIGHT_GREEN = Color3.fromRGB(50, 180, 50)
+local MENU_ALPHA = 0.95
+
+-- Services
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- Variables
+local originalAnimationIDs = {}
+local ANIMATION_DATA = {
+    {label = "Default", ids = nil},
+    {label = "Vampire", ids = {idle1="1083445855", idle2="1083450166", walk="1083473930", run="1083462077", jump="1083455352", climb="1083439238", fall="1083443587"}},
+    {label = "Hero", ids = {idle1="616111295", idle2="616113536", walk="616122287", run="616117076", jump="616115533", climb="616104706", fall="616108001"}},
+    {label = "Zombie", ids = {idle1="616158929", idle2="616160636", walk="616168032", run="616163682", jump="616161997", climb="616156119", fall="616157476"}},
+    {label = "Mage", ids = {idle1="707742142", idle2="707855907", walk="707897309", run="707861613", jump="707853694", climb="707826056", fall="707829716"}},
+    {label = "Ninja", ids = {idle1="656117400", idle2="656118341", walk="656121766", run="656118852", jump="656117878", climb="656114359", fall="656115606"}},
+    {label = "Cartoon", ids = {idle1="742637544", idle2="742638445", walk="742640026", run="742638842", jump="742637942", climb="742636889", fall="742637151"}},
+    {label = "Knight", ids = {idle1="657595757", idle2="657568135", walk="657552124", run="657564596", jump="658409194", climb="658360781", fall="657600338"}},
+    {label = "Popstar", ids = {idle1="1212900985", idle2="1212900985", walk="1212980338", run="1212980348", jump="1212954642", climb="1213044953", fall="1212900995"}},
+    {label = "Werewolf", ids = {idle1="1083195517", idle2="1083214717", walk="1083178339", run="1083216690", jump="1083218792", climb="1083182000", fall="1083189019"}},
+    {label = "Retro", ids = {idle1="10921259953", idle2="10921258489", walk="10921269718", run="10921261968", jump="10921263860", climb="10921257536", fall="10921262864"}},
+    {label = "Komunitas Adidas", ids = {idle1="122257458498464", idle2="102357151005774", walk="122150855457006", run="82598234841035", jump="75290611992385", climb="88763136693023", fall="98600215928904"}},
+    {label = "Catwalk Glam oleh E.L.F", ids = {idle1="133806214992291", idle2="94970088341563", walk="109168724482748", run="81024476153754", jump="116936326516985", climb="119377220967554", fall="92294537340807"}},
+    {label = "Penjahat Populer", ids = {idle1="118832222982049", idle2="76049494037641", walk="92072849924640", run="72301599441680", jump="104325245285198", climb="131326830509784", fall="121152442762481"}},
+    {label = "NFL", ids = {idle1="92080889861410", idle2="74451233229259", walk="110358958299415", run="117333533048078", jump="119846112151352", climb="134630013742019", fall="129773241321032"}},
+    {label = "Tidak Ada Batas oleh Walmart", ids = {idle1="92080889861410", idle2="74451233229259", walk="110358958299415", run="117333533048078", jump="119846112151352", climb="134630013742019", fall="129773241321032"}},
+    {label = "Olahraga Adidas", ids = {idle1="18537376492", idle2="18537371272", walk="18537392113", run="18537384940", jump="18537380791", climb="18537363391", fall="18537367238"}},
+    {label = "Tebal oleh E.L.F", ids = {idle1="16738333868", idle2="16738334710", walk="16738340646", run="16738337225", jump="16738336650", climb="16738332169", fall="16738333171"}},
+    {label = "Bergaya", ids = {idle1="10921272275", idle2="10921273958", walk="10921283326", run="10921276116", jump="10921279832", climb="10921271391", fall="10921278648"}},
+    {label = "Sekolah Tua", ids = {idle1="10921230744", idle2="10921232093", walk="10921244891", run="10921240218", jump="10921242013", climb="10921229866", fall="10921241244"}},
+    {label = "Superhero", ids = {idle1="10921315373", idle2="10921316709", walk="10921326949", run="10921320299", jump="10921322186", climb="10921314188", fall="10921321317"}},
+    {label = "Ninja Yang", ids = {idle1="10921155160", idle2="10921155867", walk="10921162768", run="10921157929", jump="10921160088", climb="10921154678", fall="10921159222"}},
+    {label = "Bubby", ids = {idle1="10921155160", idle2="10921155867", walk="10921162768", run="10921157929", jump="10921160088", climb="10921154678", fall="10921159222"}},
+    {label = "Penyihir", ids = {idle1="10921144709", idle2="10921145797", walk="10921152678", run="10921148209", jump="10921149743", climb="10921143404", fall="10921148939"}},
+    {label = "Robot", ids = {idle1="10921248039", idle2="10921248831", walk="10921255446", run="10921250460", jump="10921252123", climb="10921247141", fall="10921251156"}},
+    {label = "Mainan", ids = {idle1="10921301576", idle2="10921302207", walk="10921312010", run="10921306285", jump="10921308158", climb="10921300839", fall="10921307241"}},
+    {label = "Penatua", ids = {idle1="10921101664", idle2="10921102574", walk="10921111375", run="10921104374", jump="10921107367", climb="10921100400", fall="10921105765"}},
+    {label = "Lavitasi", ids = {idle1="10921132962", idle2="10921133721", walk="10921140719", run="10921135644", jump="10921137402", climb="10921132092", fall="10921136539"}},
+    {label = "Astronout", ids = {idle1="10921034824", idle2="10921036806", walk="10921046031", run="10921039308", jump="10921042494", climb="10921032124", fall="10921040576"}},
+    {label = "Manusia Serigala", ids = {idle1="10921330408", idle2="10921333667", walk="10921342074", run="10921336997", jump="1083218792", climb="10921329322", fall="10921337907"}},
+    {label = "Ksatria", ids = {idle1="10921117521", idle2="10921118894", walk="10921127095", run="10921121197", jump="10921123517", climb="10921116196", fall="10921122579"}},
+    {label = "Bajak Laut", ids = {idle1="750781874", idle2="750782770", walk="750785693", run="750783738", jump="750782230", climb="750779899", fall="750780242"}},
+    {label = "Percaya Diri", ids = {idle1="1069977950", idle2="1069987858", walk="1070017263", run="1070001516", jump="1069984524", climb="1069946257", fall="1069973677"}},
+    {label = "Popstar", ids = {idle1="1212900985", idle2="1212954651", walk="1212980338", run="1212980348", jump="1212954642", climb="1213044953", fall="1212900995"}},
+    {label = "Patroll", ids = {idle1="1149612882", idle2="1150842221", walk="1151231493", run="1150967949", jump="1150944216", climb="1148811837", fall="1148863382"}},
+    {label = "Sneaky", ids = {idle1="1132473842", idle2="1132477671", walk="1132510133", run="1132494274", jump="1132489853", climb="1132461372", fall="1132469004"}},
+    {label = "Putri", ids = {idle1="941003647", idle2="941013098", walk="941028902", run="941015281", jump="941008832", climb="940996062", fall="941000007"}},
+    {label = "Cowboy", ids = {idle1="1014390418", idle2="1014398616", walk="1014421541", run="1014401683", jump="1014394726", climb="1014380606", fall="1014384571"}},
+    {label = "Wanita Berkilau", ids = {idle1="4708191566", idle2="4708192150", walk="4708193840", run="4708192705", jump="4708188025", climb="4708184253", fall="4708186162"}},
+    {label = "Tuan Toilet", ids = {idle1="4417977954", idle2="4417978624", walk="4708193840", run="4417979645", jump="4708188025", climb="4708184253", fall="4708186162"}},
+    {label = "Ud'zal", ids = {idle1="3303162274", idle2="3303162549", walk="3303162967", run="3236836670", jump="4708188025", climb="4708184253", fall="4708186162"}},
+    {label = "Beroco Sang Penakluk", ids = {idle1="3293641938", idle2="3293642554", walk="10921269718", run="3236836670", jump="4708188025", climb="4708184253", fall="4708186162"}},
+}
+
+local IDLE_DATA = {{label = "Default", id = nil}}
+local WALK_DATA = {{label = "Default", id = nil}}
+local RUN_DATA = {{label = "Default", id = nil}}
+local JUMP_DATA = {{label = "Default", id = nil}}
+local CLIMB_DATA = {{label = "Default", id = nil}}
+local FALL_DATA = {{label = "Default", id = nil}}
+
+for i = 2, #ANIMATION_DATA do
+    local pack = ANIMATION_DATA[i]
+    if pack.ids then
+        table.insert(IDLE_DATA, {label = pack.label, id = pack.ids.idle1})
+        table.insert(WALK_DATA, {label = pack.label, id = pack.ids.walk})
+        table.insert(RUN_DATA, {label = pack.label, id = pack.ids.run})
+        table.insert(JUMP_DATA, {label = pack.label, id = pack.ids.jump})
+        table.insert(CLIMB_DATA, {label = pack.label, id = pack.ids.climb})
+        table.insert(FALL_DATA, {label = pack.label, id = pack.ids.fall})
+    end
+end
+
+local currentIdleIndex = 1
+local currentWalkIndex = 1
+local currentRunIndex = 1
+local currentJumpIndex = 1
+local currentClimbIndex = 1
+local currentFallIndex = 1
+
+-- Creator Info
+local creatorUserId = nil
+local creatorThumbnail = ""
+local success, result = pcall(function()
+    return Players:GetUserIdFromNameAsync("akuramaa_xd")
+end)
+if success then
+    creatorUserId = result
+    success, result = pcall(function()
+        return Players:GetUserThumbnailAsync(creatorUserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+    end)
+    if success then
+        creatorThumbnail = result
+    end
+end
+
+-- Cleanup Existing GUI
+local PlayerGui = player:WaitForChild("PlayerGui")
+if PlayerGui:FindFirstChild("KuramaModsTemplate") then 
+    PlayerGui["KuramaModsTemplate"]:Destroy() 
+end
+
+-- Main GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KuramaModsTemplate"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+screenGui.Enabled = true
+
+local frame = Instance.new("Frame")
+frame.Name = "Frame"
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0.5, -100, 0.5, -110)
+frame.BackgroundColor3 = BLACK
+frame.BackgroundTransparency = 1 - MENU_ALPHA
+frame.BorderSizePixel = 0
+frame.Active = false
+frame.Parent = screenGui
+frame.Visible = true
+frame.ClipsDescendants = true
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 8)
+frameCorner.Parent = frame
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundTransparency = 1
+titleBar.Parent = frame
+titleBar.Active = true
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "Animations Loader"
+title.TextColor3 = WHITE
+title.BackgroundTransparency = 1
+title.BorderSizePixel = 0
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Buttons
+local miniBtn = Instance.new("TextButton")
+miniBtn.Name = "MinimizeButton"
+miniBtn.Size = UDim2.new(0, 30, 0, 30)
+miniBtn.Position = UDim2.new(1, -60, 0, 0)
+miniBtn.Text = "-"
+miniBtn.Font = Enum.Font.GothamBold
+miniBtn.TextSize = 16
+miniBtn.TextColor3 = WHITE
+miniBtn.BackgroundTransparency = 1
+miniBtn.Parent = titleBar
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name = "Close"
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -30, 0, 0)
+closeBtn.Text = "X"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.TextColor3 = RED
+closeBtn.BackgroundTransparency = 1
+closeBtn.Parent = titleBar
+closeBtn.ZIndex = 2
+
+-- Content Frame
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, 0, 1, -30)
+contentFrame.Position = UDim2.new(0, 0, 0, 30)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = frame
+contentFrame.Visible = true
+
+-- Navigation Frame
+local navFrame = Instance.new("Frame")
+navFrame.Size = UDim2.new(1, 0, 0, 30)
+navFrame.Position = UDim2.new(0, 0, 0, 0)
+navFrame.BackgroundTransparency = 1
+navFrame.Parent = contentFrame
+
+local leftNav = Instance.new("TextButton")
+leftNav.Size = UDim2.new(0, 20, 1, 0)
+leftNav.Position = UDim2.new(0, 10, 0, 0)
+leftNav.Text = "<"
+leftNav.Font = Enum.Font.GothamBold
+leftNav.TextSize = 14
+leftNav.TextColor3 = WHITE
+leftNav.BackgroundColor3 = DARK_GRAY
+leftNav.Parent = navFrame
+
+local leftCorner = Instance.new("UICorner")
+leftCorner.CornerRadius = UDim.new(0, 4)
+leftCorner.Parent = leftNav
+
+local typeTitle = Instance.new("TextLabel")
+typeTitle.Size = UDim2.new(1, -60, 1, 0)
+typeTitle.Position = UDim2.new(0, 30, 0, 0)
+typeTitle.Text = "Idle"
+typeTitle.TextColor3 = RED
+typeTitle.BackgroundTransparency = 1
+typeTitle.Font = Enum.Font.GothamBold
+typeTitle.TextSize = 14
+typeTitle.TextXAlignment = Enum.TextXAlignment.Center
+typeTitle.Parent = navFrame
+
+local rightNav = Instance.new("TextButton")
+rightNav.Size = UDim2.new(0, 20, 1, 0)
+rightNav.Position = UDim2.new(1, -30, 0, 0)
+rightNav.Text = ">"
+rightNav.Font = Enum.Font.GothamBold
+rightNav.TextSize = 14
+rightNav.TextColor3 = WHITE
+rightNav.BackgroundColor3 = DARK_GRAY
+rightNav.Parent = navFrame
+
+local rightCorner = Instance.new("UICorner")
+rightCorner.CornerRadius = UDim.new(0, 4)
+rightCorner.Parent = rightNav
+
+-- Animation Types
+local typeNames = {"Idle", "Walk", "Run", "Jump", "Climb", "Fall"}
+local dataTables = {IDLE_DATA, WALK_DATA, RUN_DATA, JUMP_DATA, CLIMB_DATA, FALL_DATA}
+local setters = {
+    function(i) currentIdleIndex = i end,
+    function(i) currentWalkIndex = i end,
+    function(i) currentRunIndex = i end,
+    function(i) currentJumpIndex = i end,
+    function(i) currentClimbIndex = i end,
+    function(i) currentFallIndex = i end
+}
+local initialIndices = {currentIdleIndex, currentWalkIndex, currentRunIndex, currentJumpIndex, currentClimbIndex, currentFallIndex}
+local currentTypeIndex = 1
+local numTypes = #typeNames
+
+-- Functions
+local function createTypeDropdown(dataTable, initialIndex, setIndex, posY)
+    local dropdownButton = Instance.new("TextButton")
+    dropdownButton.Size = UDim2.new(0, 180, 0, 25)
+    dropdownButton.Position = UDim2.new(0, 10, 0, posY)
+    dropdownButton.Text = dataTable[initialIndex].label
+    dropdownButton.Font = Enum.Font.GothamBold
+    dropdownButton.TextSize = 10
+    dropdownButton.TextColor3 = WHITE
+    dropdownButton.BackgroundColor3 = DARK_GRAY
+    dropdownButton.TextWrapped = true
+    dropdownButton.ZIndex = 1
+    dropdownButton.Parent = contentFrame
+
+    local dropdownCorner = Instance.new("UICorner")
+    dropdownCorner.CornerRadius = UDim.new(0, 6)
+    dropdownCorner.Parent = dropdownButton
+
+    local dropdownFrame = Instance.new("ScrollingFrame")
+    dropdownFrame.Size = UDim2.new(0, 180, 0, 75)
+    dropdownFrame.Position = UDim2.new(0, 10, 0, posY + 25)
+    dropdownFrame.BackgroundColor3 = BLACK
+    dropdownFrame.BackgroundTransparency = 1 - MENU_ALPHA
+    dropdownFrame.BorderSizePixel = 0
+    dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, #dataTable * 25)
+    dropdownFrame.ScrollBarThickness = 4
+    dropdownFrame.Visible = false
+    dropdownFrame.ZIndex = 2
+    dropdownFrame.Parent = contentFrame
+
+    local dropdownFrameCorner = Instance.new("UICorner")
+    dropdownFrameCorner.CornerRadius = UDim.new(0, 6)
+    dropdownFrameCorner.Parent = dropdownFrame
+
+    local dropdownListLayout = Instance.new("UIListLayout")
+    dropdownListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    dropdownListLayout.Padding = UDim.new(0, 0)
+    dropdownListLayout.Parent = dropdownFrame
+
+    for i, data in ipairs(dataTable) do
+        local optionButton = Instance.new("TextButton")
+        optionButton.Size = UDim2.new(1, 0, 0, 25)
+        optionButton.Text = data.label
+        optionButton.Font = Enum.Font.GothamBold
+        optionButton.TextSize = 10
+        optionButton.TextColor3 = WHITE
+        optionButton.BackgroundColor3 = BLACK
+        optionButton.TextWrapped = true
+        optionButton.BorderSizePixel = 0
+        optionButton.ZIndex = 3
+        optionButton.Parent = dropdownFrame
+
+        local optionCorner = Instance.new("UICorner")
+        optionCorner.CornerRadius = UDim.new(0, 4)
+        optionCorner.Parent = optionButton
+
+        optionButton.MouseButton1Click:Connect(function()
+            setIndex(i)
+            dropdownButton.Text = data.label
+            dropdownFrame.Visible = false
+        end)
+    end
+
+    dropdownButton.MouseButton1Click:Connect(function()
+        dropdownFrame.Visible = not dropdownFrame.Visible
+    end)
+
+    return dropdownButton, dropdownFrame
+end
+
+local dropdownY = 40
+local typeButtons = {}
+local typeFrames = {}
+for i = 1, numTypes do
+    local btn, frm = createTypeDropdown(dataTables[i], initialIndices[i], setters[i], dropdownY)
+    typeButtons[i] = btn
+    typeFrames[i] = frm
+end
+
+-- Set initial visibility
+for i = 2, numTypes do
+    typeButtons[i].Visible = false
+    typeFrames[i].Visible = false
+end
+typeButtons[1].Visible = true
+typeFrames[1].Visible = false
+
+local function switchToType(newIndex)
+    typeButtons[currentTypeIndex].Visible = false
+    typeFrames[currentTypeIndex].Visible = false
+    currentTypeIndex = newIndex
+    typeTitle.Text = typeNames[currentTypeIndex]
+    typeButtons[currentTypeIndex].Visible = true
+    typeFrames[currentTypeIndex].Visible = false
+end
+
+local applyY = dropdownY + 25 + 10
+
+-- Apply Button
+local applyAnimBtn = Instance.new("TextButton")
+applyAnimBtn.Size = UDim2.new(0.45, 0, 0, 25)
+applyAnimBtn.Position = UDim2.new(0, 10, 0, applyY)
+applyAnimBtn.Text = "Apply"
+applyAnimBtn.Font = Enum.Font.GothamBold
+applyAnimBtn.TextSize = 12
+applyAnimBtn.TextColor3 = WHITE
+applyAnimBtn.BackgroundColor3 = LIGHT_GREEN
+applyAnimBtn.Parent = contentFrame
+
+local applyCorner = Instance.new("UICorner")
+applyCorner.CornerRadius = UDim.new(0, 6)
+applyCorner.Parent = applyAnimBtn
+
+-- Reset Button
+local resetAnimBtn = Instance.new("TextButton")
+resetAnimBtn.Size = UDim2.new(0.45, 0, 0, 25)
+resetAnimBtn.Position = UDim2.new(0.50, 0, 0, applyY)
+resetAnimBtn.Text = "Reset"
+resetAnimBtn.Font = Enum.Font.GothamBold
+resetAnimBtn.TextSize = 12
+resetAnimBtn.TextColor3 = WHITE
+resetAnimBtn.BackgroundColor3 = RED
+resetAnimBtn.Parent = contentFrame
+
+local resetCorner = Instance.new("UICorner")
+resetCorner.CornerRadius = UDim.new(0, 6)
+resetCorner.Parent = resetAnimBtn
+
+local function StopAnim()
+    pcall(function()
+        local char = player.Character
+        if not char or not char:FindFirstChild("Animate") then return end
+        
+        char.Animate.Disabled = false
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+        
+        local animtrack = hum:GetPlayingAnimationTracks()
+        for i, track in pairs(animtrack) do
+            track:Stop()
+        end
+    end)
+end
+
+local function cacheOriginalAnimations()
+    local char = player.Character
+    local Animate = char and char:FindFirstChild("Animate")
+    if not Animate or next(originalAnimationIDs) then return end 
+    
+    pcall(function()
+        originalAnimationIDs = {
+            idle1 = Animate.idle.Animation1.AnimationId:match("%d+"),
+            idle2 = Animate.idle.Animation2.AnimationId:match("%d+"),
+            walk = Animate.walk.WalkAnim.AnimationId:match("%d+"),
+            run = Animate.run.RunAnim.AnimationId:match("%d+"),
+            jump = Animate.jump.JumpAnim.AnimationId:match("%d+"),
+            climb = Animate.climb.ClimbAnim.AnimationId:match("%d+"),
+            fall = Animate.fall.FallAnim.AnimationId:match("%d+"),
+        }
+    end)
+end
+
+local function applyAnimationPack(ids)
+    local char = player.Character
+    local Animate = char and char:FindFirstChild("Animate")
+    if not Animate then 
+        sendNotif("Animation", "Character 'Animate' script not found.")
+        return 
+    end
+    
+    cacheOriginalAnimations() 
+    
+    local animsToApply = {}
+    
+    if not ids then 
+        animsToApply = originalAnimationIDs
+        if not next(animsToApply) then
+            sendNotif("Animation", "Default animations not cached. Re-enabling script.")
+            Animate.Disabled = false
+            return
+        end
+    elseif ids.isPartial then 
+        for k, v in pairs(originalAnimationIDs) do animsToApply[k] = v end
+        for k, v in pairs(ids) do
+            if k ~= "label" and k ~= "isPartial" then
+                animsToApply[k] = v
+            end
+        end
+    else 
+        animsToApply = ids
+    end
+    
+    local labelText
+    if not ids then
+        labelText = "Default"
+    elseif ids.label then
+        labelText = ids.label
+    else
+        labelText = "Custom"
+    end
+    
+    pcall(function()
+        Animate.Disabled = true
+        StopAnim()
+        
+        local prefix = "http://www.roblox.com/asset/?id="
+        if animsToApply.idle1 then Animate.idle.Animation1.AnimationId = prefix .. animsToApply.idle1 end
+        if animsToApply.idle2 then Animate.idle.Animation2.AnimationId = prefix .. animsToApply.idle2 end
+        if animsToApply.walk then Animate.walk.WalkAnim.AnimationId = prefix .. animsToApply.walk end
+        if animsToApply.run then Animate.run.RunAnim.AnimationId = prefix .. animsToApply.run end
+        if animsToApply.jump then Animate.jump.JumpAnim.AnimationId = prefix .. animsToApply.jump end
+        if animsToApply.climb then Animate.climb.ClimbAnim.AnimationId = prefix .. animsToApply.climb end
+        if animsToApply.fall then Animate.fall.FallAnim.AnimationId = prefix .. animsToApply.fall end
+        
+        Animate.Disabled = false
+        sendNotif("Animation", "Applied: " .. labelText)
+    end)
+end
+
+local function sendNotif(titleT, textT, image)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = titleT,
+            Text = textT,
+            Duration = 6,
+            Icon = image or ""
+        })
+    end)
+end
+
+-- Events
+local draggingTitleBar = false
+local dragStart, startPos = nil, nil
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingTitleBar = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingTitleBar = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if draggingTitleBar and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+local minimized = false
+miniBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        frame.Size = UDim2.new(0, 200, 0, 30)
+        contentFrame.Visible = false
+        miniBtn.Text = "+"
+    else
+        frame.Size = UDim2.new(0, 200, 0, 220)
+        contentFrame.Visible = true
+        miniBtn.Text = "-"
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+leftNav.MouseButton1Click:Connect(function()
+    local prevIndex = currentTypeIndex - 1
+    if prevIndex < 1 then prevIndex = numTypes end
+    switchToType(prevIndex)
+end)
+
+rightNav.MouseButton1Click:Connect(function()
+    local nextIndex = currentTypeIndex + 1
+    if nextIndex > numTypes then nextIndex = 1 end
+    switchToType(nextIndex)
+end)
+
+applyAnimBtn.MouseButton1Click:Connect(function()
+    local selectedIds = {}
+    local hasSelection = false
+
+    if IDLE_DATA[currentIdleIndex].id then
+        selectedIds.idle1 = IDLE_DATA[currentIdleIndex].id
+        selectedIds.idle2 = IDLE_DATA[currentIdleIndex].id
+        hasSelection = true
+    end
+
+    if WALK_DATA[currentWalkIndex].id then
+        selectedIds.walk = WALK_DATA[currentWalkIndex].id
+        hasSelection = true
+    end
+
+    if RUN_DATA[currentRunIndex].id then
+        selectedIds.run = RUN_DATA[currentRunIndex].id
+        hasSelection = true
+    end
+
+    if JUMP_DATA[currentJumpIndex].id then
+        selectedIds.jump = JUMP_DATA[currentJumpIndex].id
+        hasSelection = true
+    end
+
+    if CLIMB_DATA[currentClimbIndex].id then
+        selectedIds.climb = CLIMB_DATA[currentClimbIndex].id
+        hasSelection = true
+    end
+
+    if FALL_DATA[currentFallIndex].id then
+        selectedIds.fall = FALL_DATA[currentFallIndex].id
+        hasSelection = true
+    end
+
+    if hasSelection then
+        selectedIds.isPartial = true
+        applyAnimationPack(selectedIds)
+    else
+        applyAnimationPack(nil)
+    end
+end)
+
+resetAnimBtn.MouseButton1Click:Connect(function()
+    applyAnimationPack(nil)
+    currentIdleIndex = 1
+    currentWalkIndex = 1
+    currentRunIndex = 1
+    currentJumpIndex = 1
+    currentClimbIndex = 1
+    currentFallIndex = 1
+    for i = 1, numTypes do
+        typeButtons[i].Text = dataTables[i][1].label
+    end
+end)
+
+-- Initial Setup
+if player.Character then
+    cacheOriginalAnimations()
+end
+player.CharacterAdded:Connect(function(char)
+    task.wait(0.5) 
+    cacheOriginalAnimations()
+end)
+
+-- Initial Notification
+sendNotif("Animations Loader", "Created by JQ", JQ HUB)
