@@ -274,9 +274,210 @@ local bodyGyro = nil
 local GodModeEnabled = false
 
 -- ESP SYSTEM
-local ESPEnabled = false
-local espFolder = Instance.new("Folder", CoreGui)
-espFolder.Name = "ESPFolder"
+-- SERVICES
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+-- MAIN GUI (replace with your main GUI name)
+local MainGUI = game.CoreGui:FindFirstChild("MyMainGUI")
+if not MainGUI then
+    MainGUI = Instance.new("ScreenGui")
+    MainGUI.Name = "MyMainGUI"
+    MainGUI.Parent = game.CoreGui
+end
+
+-- VISUALS BUTTON
+local VisualsButton = Instance.new("TextButton")
+VisualsButton.Size = UDim2.new(0, 150, 0, 30)
+VisualsButton.Position = UDim2.new(0, 10, 0, 10)
+VisualsButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+VisualsButton.TextColor3 = Color3.fromRGB(255,255,255)
+VisualsButton.Text = "Visuals"
+VisualsButton.Parent = MainGUI
+
+-- VISUALS SUBMENU
+local VisualsFrame = Instance.new("Frame")
+VisualsFrame.Size = UDim2.new(0, 160, 0, 260)
+VisualsFrame.Position = UDim2.new(0, 10, 0, 50)
+VisualsFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+VisualsFrame.Visible = false
+VisualsFrame.Parent = MainGUI
+
+-- TOGGLE BUTTON CREATOR
+local function CreateToggleButton(name, pos, default)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 140, 0, 30)
+    btn.Position = UDim2.new(0, 10, 0, pos)
+    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Text = name..": "..(default and "ON" or "OFF")
+    btn.Parent = VisualsFrame
+
+    local state = default
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = name..": "..(state and "ON" or "OFF")
+    end)
+    return function() return state end
+end
+
+-- CREATE TOGGLES
+local GetPlayerESP = CreateToggleButton("Player ESP", 10, true)
+local GetBrainrotESP = CreateToggleButton("Brainrot ESP", 50, true)
+local GetDeliveryESP = CreateToggleButton("Delivery ESP", 90, true)
+local GetTimerESP = CreateToggleButton("Timer ESP", 130, true)
+local GetBoxes = CreateToggleButton("Boxes", 170, true)
+local GetTracers = CreateToggleButton("Tracers", 210, true)
+local GetHealth = CreateToggleButton("Healthbars", 250, true)
+
+-- SHOW/HIDE SUBMENU
+VisualsButton.MouseButton1Click:Connect(function()
+    VisualsFrame.Visible = not VisualsFrame.Visible
+end)
+
+-- ===================== ESP SYSTEM =====================
+local ESP_Objects = {}
+
+-- CREATE DRAWINGS
+local function CreateESP()
+    local box = Drawing.new("Square")
+    box.Thickness = 2
+    box.Color = Color3.fromRGB(255, 0, 0)
+    box.Filled = false
+    box.Visible = true
+
+    local tracer = Drawing.new("Line")
+    tracer.Color = Color3.fromRGB(255, 0, 0)
+    tracer.Thickness = 1
+    tracer.Visible = true
+
+    local text = Drawing.new("Text")
+    text.Size = 16
+    text.Color = Color3.fromRGB(255, 255, 255)
+    text.Center = true
+    text.Outline = true
+    text.Visible = true
+
+    local health = Drawing.new("Square")
+    health.Color = Color3.fromRGB(0, 255, 0)
+    health.Filled = true
+    health.Visible = true
+
+    return {box=box, tracer=tracer, text=text, health=health}
+end
+
+-- ADD ESP OBJECT
+local function AddESP(obj, getTextFunc, getColorFunc, type)
+    local drawings = CreateESP()
+    ESP_Objects[#ESP_Objects+1] = {
+        obj = obj,
+        drawings = drawings,
+        getText = getTextFunc,
+        getColor = getColorFunc,
+        type = type -- player, brainrot, delivery, timer
+    }
+end
+
+-- PLAYER ESP
+local function AddPlayerESP(plr)
+    AddESP(plr, function()
+        local char = plr.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return nil end
+        local hrp = char.HumanoidRootPart
+        local dist = (LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+        return plr.Name.." | "..math.floor(dist).." studs", hrp.Position, char.Humanoid.Health, char.Humanoid.MaxHealth
+    end, function() return Color3.fromRGB(255,0,0) end, "player")
+end
+
+for _, plr in pairs(Players:GetPlayers()) do
+    if plr ~= LocalPlayer then AddPlayerESP(plr) end
+end
+Players.PlayerAdded:Connect(function(plr)
+    if plr ~= LocalPlayer then AddPlayerESP(plr) end
+end)
+
+-- OBJECT ESP (Brainrot + Delivery)
+local function AddObjectESP(name, color, type)
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj.Name == name and obj:IsA("BasePart") then
+            AddESP(obj, function() return name, obj.Position end, function() return color end, type)
+        end
+    end
+    workspace.DescendantAdded:Connect(function(obj)
+        if obj.Name == name and obj:IsA("BasePart") then
+            AddESP(obj, function() return name, obj.Position end, function() return color end, type)
+        end
+    end)
+end
+
+AddObjectESP("Brainrot", Color3.fromRGB(255, 255, 0), "brainrot")
+AddObjectESP("DeliveryBox", Color3.fromRGB(0, 255, 255), "delivery")
+
+-- TIMER ESP
+local BaseTimer = workspace:FindFirstChild("BaseTimer")
+if BaseTimer and BaseTimer:IsA("NumberValue") then
+    AddESP(BaseTimer, function() return "TIMER: "..math.floor(BaseTimer.Value), BaseTimer.Parent.Position end, function() return Color3.fromRGB(255,255,255) end, "timer")
+end
+
+-- RENDER LOOP
+RunService.RenderStepped:Connect(function()
+    local cam = Camera
+    for _, item in ipairs(ESP_Objects) do
+        local obj = item.obj
+        local draw = item.drawings
+
+        -- Check if this ESP type is enabled
+        local enabled = true
+        if item.type == "player" then enabled = GetPlayerESP() end
+        if item.type == "brainrot" then enabled = GetBrainrotESP() end
+        if item.type == "delivery" then enabled = GetDeliveryESP() end
+        if item.type == "timer" then enabled = GetTimerESP() end
+
+        draw.box.Visible = enabled and GetBoxes()
+        draw.tracer.Visible = enabled and GetTracers()
+        draw.text.Visible = enabled
+        draw.health.Visible = enabled and GetHealth()
+
+        local ok, text, pos, health, maxHealth = pcall(item.getText)
+        if not ok or not text or not pos then
+            draw.box.Visible = false
+            draw.tracer.Visible = false
+            draw.text.Visible = false
+            draw.health.Visible = false
+            continue
+        end
+
+        local screenPos, visible = cam:WorldToViewportPoint(pos)
+        if visible then
+            local size = 50 / (cam.CFrame.Position - pos).Magnitude
+            draw.box.Size = Vector2.new(size, size)
+            draw.box.Position = Vector2.new(screenPos.X-size/2, screenPos.Y-size/2)
+            draw.box.Color = item.getColor()
+
+            draw.tracer.From = Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y)
+            draw.tracer.To = Vector2.new(screenPos.X, screenPos.Y)
+            draw.tracer.Color = item.getColor()
+
+            draw.text.Text = text
+            draw.text.Position = Vector2.new(screenPos.X, screenPos.Y - size/2 - 10)
+
+            if health and maxHealth then
+                local h = size * (health / maxHealth)
+                draw.health.Size = Vector2.new(4, h)
+                draw.health.Position = Vector2.new(screenPos.X - size/2 - 6, screenPos.Y + size/2 - h)
+                draw.health.Color = Color3.fromRGB(0, 255, 0)
+            end
+        else
+            draw.box.Visible = false
+            draw.tracer.Visible = false
+            draw.text.Visible = false
+            draw.health.Visible = false
+        end
+    end
+end)
+
 
 -- MINI MAP SYSTEM
 local MiniMapEnabled = false
