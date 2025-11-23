@@ -4170,3 +4170,124 @@ task.spawn(function()
         end
     end
 end)
+-- GUI SETUP
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+-- Animation Toggle Button
+local toggleButton = Instance.new("TextButton", screenGui)
+toggleButton.Size = UDim2.new(0, 160, 0, 50)
+toggleButton.Position = UDim2.new(0.02, 0, 0.02, 0)
+toggleButton.Text = "Animation: OFF"
+toggleButton.BackgroundColor3 = Color3.fromRGB(180,0,0)
+toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 22
+
+-- Reset Character Button
+local resetButton = Instance.new("TextButton", screenGui)
+resetButton.Size = UDim2.new(0, 160, 0, 50)
+resetButton.Position = UDim2.new(0.02, 0, 0.08, 0)
+resetButton.Text = "Reset Character"
+resetButton.BackgroundColor3 = Color3.fromRGB(0,0,180)
+resetButton.TextColor3 = Color3.fromRGB(255,255,255)
+resetButton.Font = Enum.Font.SourceSansBold
+resetButton.TextSize = 22
+
+local running = false
+local animationLoop
+local Figure, RightShoulder, LeftShoulder, RightHip, LeftHip
+
+-- START ANIMATION FUNCTION
+local function StartAnimation()
+	if running then return end
+	running = true
+	toggleButton.Text = "Animation: ON"
+	toggleButton.BackgroundColor3 = Color3.fromRGB(0,180,0)
+
+	Figure = player.Character or player.CharacterAdded:Wait()
+	local Humanoid = Figure:WaitForChild("Humanoid")
+
+	-- Disable default Animate script
+	local Animate = Figure:FindFirstChild("Animate")
+	if Animate then Animate.Disabled = true end
+
+	-- Wait for R6 joints
+	local function waitForChild(parent, childName)
+		local child = parent:FindFirstChild(childName)
+		if child then return child end
+		while true do
+			child = parent.ChildAdded:Wait()
+			if child.Name==childName then return child end
+		end
+	end
+
+	local Torso = waitForChild(Figure, "Torso")
+	RightShoulder = waitForChild(Torso, "Right Shoulder")
+	LeftShoulder = waitForChild(Torso, "Left Shoulder")
+	RightHip = waitForChild(Torso, "Right Hip")
+	LeftHip = waitForChild(Torso, "Left Hip")
+
+	-- CONNECT EVENTS
+	Humanoid.Died:Connect(function() StopAnimation() end)
+	Humanoid.Running:Connect(function(speed) pose = speed>0 and "Running" or "Standing" end)
+	Humanoid.Jumping:Connect(function() pose="Jumping" end)
+	Humanoid.FreeFalling:Connect(function() pose="FreeFall" end)
+	Humanoid.Seated:Connect(function() pose="Seated" end)
+	Humanoid.Climbing:Connect(function() pose="Climbing" end)
+	Humanoid.Swimming:Connect(function(speed) pose = speed>0 and "Running" or "Standing" end)
+
+	-- ANIMATION LOOP
+	animationLoop = task.spawn(function()
+		while running and Figure and Figure.Parent do
+			local time = tick()
+			pcall(function() move(time) end) -- calls your existing move function safely
+			task.wait(0.1)
+		end
+	end)
+end
+
+-- STOP ANIMATION FUNCTION WITH RESET
+function StopAnimation()
+	if not running then return end
+	running = false
+	toggleButton.Text = "Animation: OFF"
+	toggleButton.BackgroundColor3 = Color3.fromRGB(180,0,0)
+	if animationLoop then
+		task.cancel(animationLoop)
+		animationLoop = nil
+	end
+
+	-- Reset joints to default angles
+	pcall(function()
+		if RightShoulder then RightShoulder:SetDesiredAngle(0) end
+		if LeftShoulder then LeftShoulder:SetDesiredAngle(0) end
+		if RightHip then RightHip:SetDesiredAngle(0) end
+		if LeftHip then LeftHip:SetDesiredAngle(0) end
+	end)
+end
+
+-- RESET CHARACTER FUNCTION
+local function ResetCharacter()
+	StopAnimation()
+	local char = player.Character
+	if char then
+		-- Re-enable Animate script
+		local animate = char:FindFirstChild("Animate")
+		if animate then animate.Disabled = false end
+	end
+end
+
+-- TOGGLE BUTTON CLICK
+toggleButton.MouseButton1Click:Connect(function()
+	if running then
+		StopAnimation()
+	else
+		StartAnimation()
+	end
+end)
+
+-- RESET BUTTON CLICK
+resetButton.MouseButton1Click:Connect(function()
+	ResetCharacter()
+end)
