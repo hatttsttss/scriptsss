@@ -250,18 +250,35 @@ local FilterStates = {
 
 -- ZERO HUB SYSTEM
 local ZEROHUBDBoosts = {
-    Enabled = false,
-    OriginalValues = {
-        Gravity = workspace.Gravity,
-        WalkSpeed = 16,
-        JumpPower = 50
-    },
-    CurrentValues = {
-        Gravity = 0,
-        Speed = 0,
-        Jump = 0
-    }
-}
+--// SETTINGS
+local toggleKey = Enum.KeyCode.Z     -- Keybind
+local lowGravity = 0                 -- Gravity when toggled ON
+local normalGravity = 196.2          -- Default Roblox gravity
+
+--// VARIABLES
+local uis = game:GetService("UserInputService")
+local gravityEnabled = false
+
+--// FUNCTION
+local function toggleGravity()
+    gravityEnabled = not gravityEnabled
+
+    if gravityEnabled then
+        workspace.Gravity = lowGravity
+        print("Gravity: LOW")
+    else
+        workspace.Gravity = normalGravity
+        print("Gravity: NORMAL")
+    end
+end
+
+--// KEYBIND LISTENER
+uis.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == toggleKey then
+        toggleGravity()
+    end
+end)
 
 -- FLY SYSTEM
 local FlyEnabled = false
