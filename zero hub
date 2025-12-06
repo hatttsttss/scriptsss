@@ -1,5 +1,5 @@
 
--- JQ HUB - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
+-- zero hub - COMPLETE WORKING SCRIPT WITH DESYNC AND BRAINROT FINDER
 local player = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -248,8 +248,20 @@ local FilterStates = {
     Gods = false
 }
 
--- JQ HUB SYSTEM
+-- ZERO HUB SYSTEM
 local ZEROHUBDBoosts = {
+    Enabled = false,
+    OriginalValues = {
+        Gravity = workspace.Gravity,
+        WalkSpeed = 16,
+        JumpPower = 50
+    },
+    CurrentValues = {
+        Gravity = 0,
+        Speed = 0,
+        Jump = 0
+    }
+}
 
 -- FLY SYSTEM
 local FlyEnabled = false
@@ -262,199 +274,9 @@ local bodyGyro = nil
 local GodModeEnabled = false
 
 -- ESP SYSTEM
--- Services
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-
--- Create GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ESP_GUI"
-ScreenGui.Parent = CoreGui
-
-local function CreateToggle(name, pos, default)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 120, 0, 30)
-    btn.Position = UDim2.new(0, 10, 0, pos)
-    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    btn.BorderSizePixel = 0
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Text = name..": "..(default and "ON" or "OFF")
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 14
-    btn.Active = true
-    btn.Visible = true
-
-    local state = default
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.Text = name..": "..(state and "ON" or "OFF")
-    end)
-
-    return btn, function() return state end
-end
-
--- Create Toggles
-local PlayerESPButton, GetPlayerESP = CreateToggle("Player ESP", 10, true)
-local BrainrotESPButton, GetBrainrotESP = CreateToggle("Brainrot ESP", 50, true)
-local DeliveryESPButton, GetDeliveryESP = CreateToggle("Delivery ESP", 90, true)
-local TimerESPButton, GetTimerESP = CreateToggle("Timer ESP", 130, true)
-local BoxButton, GetBoxes = CreateToggle("Boxes", 170, true)
-local TracerButton, GetTracers = CreateToggle("Tracers", 210, true)
-local HealthButton, GetHealth = CreateToggle("Healthbars", 250, true)
-
--- Parent buttons
-PlayerESPButton.Parent = ScreenGui
-BrainrotESPButton.Parent = ScreenGui
-DeliveryESPButton.Parent = ScreenGui
-TimerESPButton.Parent = ScreenGui
-BoxButton.Parent = ScreenGui
-TracerButton.Parent = ScreenGui
-HealthButton.Parent = ScreenGui
-
--- --- ESP Storage ---
-local ESP_Objects = {}
-
--- Reuse previous ESP creation functions
-local function CreateESP()
-    local box = Drawing.new("Square")
-    box.Thickness = 2
-    box.Color = Color3.fromRGB(255, 0, 0)
-    box.Filled = false
-    box.Visible = true
-
-    local tracer = Drawing.new("Line")
-    tracer.Color = Color3.fromRGB(255, 0, 0)
-    tracer.Thickness = 1
-    tracer.Visible = true
-
-    local text = Drawing.new("Text")
-    text.Size = 16
-    text.Color = Color3.fromRGB(255, 255, 255)
-    text.Center = true
-    text.Outline = true
-    text.Visible = true
-
-    local health = Drawing.new("Square")
-    health.Color = Color3.fromRGB(0, 255, 0)
-    health.Filled = true
-    health.Visible = true
-
-    return {box=box, tracer=tracer, text=text, health=health}
-end
-
-local function AddESP(obj, getTextFunc, getColorFunc, type)
-    local drawings = CreateESP()
-    ESP_Objects[#ESP_Objects+1] = {
-        obj = obj,
-        drawings = drawings,
-        getText = getTextFunc,
-        getColor = getColorFunc,
-        type = type -- "player", "brainrot", "delivery", "timer"
-    }
-end
-
--- PLAYER ESP
-local function AddPlayerESP(plr)
-    AddESP(plr, function()
-        local char = plr.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return nil end
-        local hrp = char.HumanoidRootPart
-        local dist = (LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
-        return plr.Name.." | "..math.floor(dist).." studs", hrp.Position, char.Humanoid.Health, char.Humanoid.MaxHealth
-    end, function() return Color3.fromRGB(255,0,0) end, "player")
-end
-
-for _, plr in pairs(Players:GetPlayers()) do
-    if plr ~= LocalPlayer then AddPlayerESP(plr) end
-end
-
-Players.PlayerAdded:Connect(function(plr)
-    if plr ~= LocalPlayer then AddPlayerESP(plr) end
-end)
-
--- OBJECT ESP
-local function AddObjectESP(name, color, type)
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj.Name == name and obj:IsA("BasePart") then
-            AddESP(obj, function() return name, obj.Position end, function() return color end, type)
-        end
-    end
-
-    workspace.DescendantAdded:Connect(function(obj)
-        if obj.Name == name and obj:IsA("BasePart") then
-            AddESP(obj, function() return name, obj.Position end, function() return color end, type)
-        end
-    end)
-end
-
-AddObjectESP("Brainrot", Color3.fromRGB(255, 255, 0), "brainrot")
-AddObjectESP("DeliveryBox", Color3.fromRGB(0, 255, 255), "delivery")
-
--- TIMER ESP example
-local BaseTimer = workspace:FindFirstChild("BaseTimer")
-if BaseTimer and BaseTimer:IsA("NumberValue") then
-    AddESP(BaseTimer, function() return "TIMER: "..math.floor(BaseTimer.Value), BaseTimer.Parent.Position end, function() return Color3.fromRGB(255,255,255) end, "timer")
-end
-
--- RENDER LOOP
-RunService.RenderStepped:Connect(function()
-    local cam = Camera
-    for _, item in ipairs(ESP_Objects) do
-        local obj = item.obj
-        local draw = item.drawings
-
-        local enabled = true
-        if item.type == "player" then enabled = GetPlayerESP() end
-        if item.type == "brainrot" then enabled = GetBrainrotESP() end
-        if item.type == "delivery" then enabled = GetDeliveryESP() end
-        if item.type == "timer" then enabled = GetTimerESP() end
-
-        draw.box.Visible = enabled and GetBoxes()
-        draw.tracer.Visible = enabled and GetTracers()
-        draw.text.Visible = enabled
-        draw.health.Visible = enabled and GetHealth()
-
-        local ok, text, pos, health, maxHealth = pcall(item.getText)
-        if not ok or not text or not pos then
-            draw.box.Visible = false
-            draw.tracer.Visible = false
-            draw.text.Visible = false
-            draw.health.Visible = false
-            continue
-        end
-
-        local screenPos, visible = cam:WorldToViewportPoint(pos)
-        if visible then
-            local size = 50 / (cam.CFrame.Position - pos).Magnitude
-            draw.box.Size = Vector2.new(size, size)
-            draw.box.Position = Vector2.new(screenPos.X-size/2, screenPos.Y-size/2)
-            draw.box.Color = item.getColor()
-
-            draw.tracer.From = Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y)
-            draw.tracer.To = Vector2.new(screenPos.X, screenPos.Y)
-            draw.tracer.Color = item.getColor()
-
-            draw.text.Text = text
-            draw.text.Position = Vector2.new(screenPos.X, screenPos.Y - size/2 - 10)
-
-            if health and maxHealth then
-                local h = size * (health / maxHealth)
-                draw.health.Size = Vector2.new(4, h)
-                draw.health.Position = Vector2.new(screenPos.X - size/2 - 6, screenPos.Y + size/2 - h)
-                draw.health.Color = Color3.fromRGB(0, 255, 0)
-            end
-        else
-            draw.box.Visible = false
-            draw.tracer.Visible = false
-            draw.text.Visible = false
-            draw.health.Visible = false
-        end
-    end
-end)
-
+local ESPEnabled = false
+local espFolder = Instance.new("Folder", CoreGui)
+espFolder.Name = "ESPFolder"
 
 -- MINI MAP SYSTEM
 local MiniMapEnabled = false
@@ -469,7 +291,7 @@ local deliveryConnection = nil
 -- AUTO JOIN SYSTEM
 _G.AutoJoinEnabled = false
 
--- JQ HUB PLATFORM (STANDARD)
+-- ZERO HUB PLATFORM (STANDARD)
 local CRAKCEDPlatformEnabled = false
 local CRAKCEDPlatform = nil
 local platformGUI = nil
@@ -489,7 +311,7 @@ local stopClimb = false
 local playerSpawnPosition = Vector3.new(0, 25, 0)
 local checkpointPosition = Vector3.new(0, 25, 0)
 
--- Function to create JQ HUB center label
+-- Function to create ZERO HUB center label
 local function createCRAKCEDHubCenterLabel()
     -- Services
     local Players = game:GetService("Players")
@@ -508,7 +330,7 @@ local function createCRAKCEDHubCenterLabel()
     label.Position = UDim2.new(0.5, 0, 0.5, 0)
     label.AnchorPoint = Vector2.new(0.5, 0.5)
     label.BackgroundTransparency = 1
-    label.Text = "JQ HUB"
+    label.Text = "ZERO HUB"
     label.TextColor3 = Color3.fromRGB(0, 0, 0)
     label.TextScaled = true
     label.Font = Enum.Font.GothamBold
@@ -903,7 +725,7 @@ local function showCRAKCEDIntro(callback)
     local logo = Instance.new("TextLabel", gui)
     logo.Size = UDim2.fromScale(1,1)
     logo.BackgroundTransparency = 1
-    logo.Text = "JQ HUB"
+    logo.Text = "ZERO HUB"
     logo.TextColor3 = Color3.new(0,0,0)
     logo.Font = Enum.Font.GothamBlack
     logo.TextScaled = true
@@ -2912,7 +2734,7 @@ end
 
 -- BRAINROT SPAWNER Function
 local function startBrainrotSpawner()
-    -- Close JQ HUB menu when Brainrot Spawner is activated
+    -- Close ZERO HUB menu when Brainrot Spawner is activated
     if mainMenu then
         mainMenu.Enabled = false
     end
@@ -3569,7 +3391,7 @@ local function openSettingsPage()
     -- Export Settings Button
     createCRAKCEDButton("Export Settings", UDim2.new(0.05, 0, 0, 1365), function()
         if setclipboard then
-            local settingsString = "JQ HUB Settings:\n"
+            local settingsString = "ZERO HUB Settings:\n"
             settingsString = settingsString .. "Theme: " .. tostring(GuiSettings.ThemeColor) .. "\n"
             settingsString = settingsString .. "Hide Watermark: " .. tostring(GuiSettings.HideWatermark) .. "\n"
             settingsString = settingsString .. "Notification Duration: " .. GuiSettings.NotificationDuration .. "s\n"
@@ -3676,7 +3498,7 @@ local function openSettingsPage()
         tween.Completed:Wait()
 
         settingsGui:Destroy()
-        -- Reopen JQ HUB menu when settings closes
+        -- Reopen ZERO HUB menu when settings closes
         if mainMenu then
             mainMenu.Enabled = true
         end
@@ -3746,7 +3568,7 @@ local function loadMainMenu()
     lib = loadedLib
 
     local main = lib:Load({
-        Title = "Steal a Brainrot 〢 JQ HUB",
+        Title = "Steal a Brainrot 〢 ZERO HUB",
         ToggleButton = "rbxassetid://105059922903197",
         BindGui = Enum.KeyCode.RightControl,
     })
@@ -3779,7 +3601,7 @@ local function loadMainMenu()
         VisualMain = tabs.Visual:AddSection({Title = "Visual Features", Description = "ESP, Mini Map, and visual enhancements", Defualt = false, Locked = false}),
         Character = tabs.Character:AddSection({Title = "Character Controls", Description = "Character manipulation and movement", Defualt = false, Locked = false}),
         Desync = tabs.Character:AddSection({Title = "DESYNC SYSTEM", Description = "Activate external desync script", Defualt = false, Locked = false}),
-        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY JQ HUB⚠️", Defualt = false, Locked = false}),
+        BrainrotSpawner = tabs.Brainrot:AddSection({Title = "BRAINROT SPAWNER", Description = "Load external Brainrot scripts ⚠️NOT OWNED BY ZERO HUB⚠️", Defualt = false, Locked = false}),
         PrivateServerMain = tabs.PrivateServer:AddSection({Title = "PRIVATE SERVER ⚠️PATCHED⚠️", Description = "Private server system currently patched", Defualt = false, Locked = false}),
         BrainrotFinderMain = tabs.BrainrotFinder:AddSection({Title = "BRAINROT FINDER", Description = "Find and track specific brainrot players", Defualt = false, Locked = false}),
         SettingsMain = tabs.Settings:AddSection({Title = "SETTINGS", Description = "Open full settings panel", Defualt = false, Locked = false})
@@ -3799,8 +3621,8 @@ local function loadMainMenu()
     })
 
     Sections.Welcome:AddParagraph({
-        Title = "Welcome to JQ HUB!",
-        Description = "👋 Welcome to JQ HUB!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
+        Title = "Welcome to ZERO HUB!",
+        Description = "👋 Welcome to ZERO HUB!\nIf you find any bugs or issues, join our Discord and report them — we appreciate your help!"
     })
 
     -- DELIVERY STEAL Section
@@ -4047,7 +3869,7 @@ CONTROLS:
     -- BRAINROT SPAWNER Section
     Sections.BrainrotSpawner:AddButton({
         Title = "🚀 START BRAINROT SPAWNER",
-        Description = "Load external Brainrot scripts - NOT OWNED BY JQ HUB",
+        Description = "Load external Brainrot scripts - NOT OWNED BY ZERO HUB",
         Callback = function()
             startBrainrotSpawner()
         end
@@ -4058,7 +3880,7 @@ CONTROLS:
         Description = [[
 This feature loads external scripts from third-party sources.
 
-• NOT developed or owned by JQ HUB
+• NOT developed or owned by ZERO HUB
 • Use at your own risk
 • No support provided for external scripts
 • May be detected by anti-cheat systems
@@ -4215,7 +4037,7 @@ NOTE: Uses external BrainrotFinder script
     menuLoadInProgress = false
     
     if GuiSettings.ShowWelcomeMessage then
-        lib:Notification('JQ HUB', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
+        lib:Notification('ZERO HUB', '✅ ALL FEATURES LOADED SUCCESSFULLY!\n👋 Report bugs in our Discord!', 5)
     end
     
     return true
@@ -4230,9 +4052,9 @@ local function toggleMenu()
     if mainMenu then
         mainMenu.Enabled = not mainMenu.Enabled
         if mainMenu.Enabled then
-            showNotification("JQ HUB", "Menu shown - Press RightControl to hide", 3)
+            showNotification("ZERO HUB", "Menu shown - Press RightControl to hide", 3)
         else
-            showNotification("JQ HUB", "Menu hidden - Press RightControl to show", 3)
+            showNotification("ZERO HUB", "Menu hidden - Press RightControl to show", 3)
         end
     else
         loadMainMenu()
@@ -4303,7 +4125,7 @@ end)
 showCRAKCEDIntro(function()
     loadAllSettings()
     
-    -- Create JQ HUB label in the middle of the screen
+    -- Create ZERO HUB label in the middle of the screen
     createCRAKCEDHubCenterLabel()
     
     -- ✅ Auto-load menu after teleport if flag is set
@@ -4317,7 +4139,7 @@ showCRAKCEDIntro(function()
     end
     
     task.delay(2, function()
-        showNotification("JQ HUB", "Loaded successfully! Press RightControl to toggle menu", 5)
+        showNotification("ZERO HUB", "Loaded successfully! Press RightControl to toggle menu", 5)
     end)
 end)
 
